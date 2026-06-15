@@ -2677,7 +2677,7 @@ class PBIRSemanticModel:
             text = tmdl_file.read_text(encoding="utf-8-sig")
 
             # Skip calculated / DAX partitions — they have no physical storage mode
-            pt_match = re.search(r'\bpartition\s+\S+\s*=\s*(\w+)', text)
+            pt_match = re.search(r'\bpartition\s+.+?\s*=\s*(\w+)', text)
             pt = pt_match.group(1).lower() if pt_match else "unknown"
             if pt in ("calculated", "dax"):
                 skipped.append({
