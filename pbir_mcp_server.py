@@ -50,6 +50,111 @@ VISUAL_CONTAINER_KEYS = {
 }
 VISUAL_GROUP_MODES = {"ScaleMode", "ScrollMode"}
 
+# Power BI only renders a visual's data when the queryState role names match the
+# data roles in that visual type's capabilities. A cartesian chart handed
+# "Axis"/"Values"/"Legend" instead of "Category"/"Y"/"Series" draws an empty
+# canvas while still passing schema validation. To spare callers from memorizing
+# each visual's exact role names, map the common/intuitive aliases to the
+# canonical PBIR role per visual-type family. Inner keys are lowercased aliases;
+# values are the canonical role names Power BI actually renders.
+_CARTESIAN_ROLES = {  # bar / column / line / area: category axis, legend, value
+    "axis": "Category", "category": "Category", "x": "Category",
+    "legend": "Series", "series": "Series", "group": "Series",
+    "values": "Y", "value": "Y", "y": "Y",
+    "y2": "Y2", "secondaryvalues": "Y2",
+    "tooltips": "Tooltips", "tooltip": "Tooltips",
+    "smallmultiples": "SmallMultiples", "small_multiples": "SmallMultiples",
+}
+_CATEGORICAL_ROLES = {  # pie / donut: the legend is the Category role, values is Y
+    "axis": "Category", "category": "Category", "legend": "Category", "group": "Category",
+    "values": "Y", "value": "Y", "y": "Y",
+    "details": "Details", "detail": "Details",
+    "tooltips": "Tooltips", "tooltip": "Tooltips",
+}
+_CARD_ROLES = {
+    "values": "Values", "value": "Values", "y": "Values",
+    "field": "Values", "fields": "Values", "data": "Values",
+}
+_TABLE_ROLES = {
+    "values": "Values", "value": "Values", "y": "Values",
+    "columns": "Values", "column": "Values", "fields": "Values", "field": "Values",
+}
+_MATRIX_ROLES = {
+    "rows": "Rows", "row": "Rows", "axis": "Rows", "category": "Rows",
+    "columns": "Columns", "column": "Columns", "legend": "Columns", "series": "Columns",
+    "values": "Values", "value": "Values", "y": "Values",
+}
+_SLICER_ROLES = {
+    "values": "Values", "value": "Values", "field": "Values", "fields": "Values",
+    "column": "Values", "axis": "Values", "category": "Values",
+}
+VISUAL_ROLE_ALIASES: dict[str, dict[str, str]] = {
+    "card": _CARD_ROLES,
+    "multiRowCard": _CARD_ROLES,
+    "clusteredBarChart": _CARTESIAN_ROLES,
+    "barChart": _CARTESIAN_ROLES,
+    "stackedBarChart": _CARTESIAN_ROLES,
+    "hundredPercentStackedBarChart": _CARTESIAN_ROLES,
+    "clusteredColumnChart": _CARTESIAN_ROLES,
+    "columnChart": _CARTESIAN_ROLES,
+    "stackedColumnChart": _CARTESIAN_ROLES,
+    "hundredPercentStackedColumnChart": _CARTESIAN_ROLES,
+    "lineChart": _CARTESIAN_ROLES,
+    "areaChart": _CARTESIAN_ROLES,
+    "stackedAreaChart": _CARTESIAN_ROLES,
+    "pieChart": _CATEGORICAL_ROLES,
+    "donutChart": _CATEGORICAL_ROLES,
+    "tableEx": _TABLE_ROLES,
+    "pivotTable": _MATRIX_ROLES,
+    "slicer": _SLICER_ROLES,
+}
+# Visual-type lookups are case-insensitive.
+_VISUAL_ROLE_ALIASES_LC = {key.lower(): value for key, value in VISUAL_ROLE_ALIASES.items()}
+
+
+def normalize_query_roles(
+    visual_type: str | None,
+    query_roles: dict[str, Any],
+) -> tuple[dict[str, Any], list[dict[str, str]]]:
+    """Map caller-supplied role names to the canonical PBIR roles for a visual type.
+
+    Returns ``(normalized_roles, remaps)`` where ``remaps`` lists ``{"from", "to"}``
+    entries for every role that was renamed, so the caller can be told what changed.
+    Roles already canonical, or not recognized as an alias, pass through unchanged so
+    raw/advanced role names keep working. When two source roles collapse to the same
+    canonical role their projections are concatenated.
+    """
+    aliases = _VISUAL_ROLE_ALIASES_LC.get((visual_type or "").lower())
+    if not aliases:
+        return dict(query_roles), []
+    canonical = set(aliases.values())
+    normalized: dict[str, Any] = {}
+    remaps: list[dict[str, str]] = []
+    for role, projection in query_roles.items():
+        target = role if role in canonical else aliases.get(role.lower(), role)
+        if target != role:
+            remaps.append({"from": role, "to": target})
+        if target in normalized:
+            existing = normalized[target]
+            existing = existing if isinstance(existing, list) else [existing]
+            addition = projection if isinstance(projection, list) else [projection]
+            normalized[target] = existing + addition
+        else:
+            normalized[target] = projection
+    return normalized, remaps
+
+
+def unknown_query_roles(visual_type: str | None, query: Any) -> list[str]:
+    """Return queryState role names a known visual type cannot render (else [])."""
+    aliases = _VISUAL_ROLE_ALIASES_LC.get(str(visual_type or "").lower())
+    if not aliases or not isinstance(query, dict):
+        return []
+    state = query.get("queryState")
+    if not isinstance(state, dict):
+        return []
+    allowed = set(aliases.values())
+    return [role for role in state if role not in allowed]
+
 
 STYLE_PRESETS: dict[str, dict[str, Any]] = {
     "dark": {
@@ -1713,7 +1818,9 @@ class PBIRReport:
             visual_config["visualContainerObjects"] = {
                 "title": [{"properties": {"show": pbir_literal(True), "text": pbir_literal(title)}}]
             }
+        role_remaps: list[dict[str, str]] = []
         if query_roles:
+            query_roles, role_remaps = normalize_query_roles(visual_kind, query_roles)
             visual_config["query"] = self.build_query(query_roles)
         if properties:
             visual_config.setdefault("objects", {})
@@ -1724,6 +1831,10 @@ class PBIRReport:
         visual_dir.mkdir(parents=True, exist_ok=False)
         write_json(visual_dir / "visual.json", visual_json)
         result: dict[str, Any] = {"visual": self.visual_summary(page_dir, visual_dir)}
+        if role_remaps:
+            # Surface alias corrections (e.g. Axis -> Category) so the caller knows
+            # the roles it sent were adjusted to render for this visual type.
+            result["role_remaps"] = role_remaps
         if validate_after:
             result["validation"] = validation_summary(self.validate().as_dict())
         return result
@@ -2317,6 +2428,17 @@ class PBIRReport:
                 warnings.append(f"Visual {visual_path} extends beyond page width.")
             if isinstance(page_height, (int, float)) and pos["y"] + pos["height"] > page_height:
                 warnings.append(f"Visual {visual_path} extends beyond page height.")
+        visual_inner = visual.get("visual")
+        if isinstance(visual_inner, dict):
+            visual_type = visual_inner.get("visualType")
+            unknown = unknown_query_roles(visual_type, visual_inner.get("query"))
+            if unknown:
+                allowed = sorted(set(_VISUAL_ROLE_ALIASES_LC[str(visual_type).lower()].values()))
+                warnings.append(
+                    f"Visual {visual_path} ({visual_type}) uses data role(s) "
+                    f"{', '.join(sorted(unknown))} that this visual type does not render; "
+                    f"expected one of {', '.join(allowed)}. The visual may appear empty."
+                )
 
 
 class PBIRSemanticModel:
@@ -3647,7 +3769,11 @@ class PBIRMCPServer:
         )
         self.add_tool(
             "add_visual_from_template",
-            "Add a visual. Use pbir_apply_plan when adding multiple visuals.",
+            "Add a visual. Use pbir_apply_plan when adding multiple visuals. "
+            "query_roles maps each data role to its projection(s). Role names are "
+            "normalized per visual type, so chart aliases Axis->Category, Values->Y, "
+            "Legend->Series are accepted; cards/tables/slicers use Values; matrix uses "
+            "Rows/Columns/Values. Any rename is reported back in result.role_remaps.",
             {
                 "type": "object",
                 "properties": {
@@ -3658,7 +3784,17 @@ class PBIRMCPServer:
                     "title": {"type": "string"},
                     "name": {"type": "string"},
                     "position": {"type": "object"},
-                    "query_roles": {"type": "object"},
+                    "query_roles": {
+                        "type": "object",
+                        "description": (
+                            "Map of data role -> projection or list of projections. "
+                            "Cartesian charts render Category/Y/Series (aliases "
+                            "Axis/Values/Legend are auto-corrected); pie/donut use "
+                            "Category/Y; card/table/slicer use Values; matrix uses "
+                            "Rows/Columns/Values. Each projection is "
+                            "{table, column|measure[, aggregate]} or {raw, queryRef}."
+                        ),
+                    },
                     "properties": {"type": "object"},
                     "raw_patch": {"type": "object"},
                 },

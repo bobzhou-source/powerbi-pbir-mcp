@@ -13,6 +13,8 @@ from pbir_mcp_server import (
     VERSION_SCHEMA,
     PBIRReport,
     PBIRMCPServer,
+    normalize_query_roles,
+    unknown_query_roles,
 )
 
 
@@ -109,6 +111,92 @@ class PBIRReportTests(unittest.TestCase):
 
             visual_json = json.loads((report_dir / "definition" / "pages" / "ExecutiveSummary" / "visuals" / "RevenueCard" / "visual.json").read_text())
             self.assertIn("query", visual_json["visual"])
+
+    def test_normalize_query_roles_maps_chart_aliases(self) -> None:
+        normalized, remaps = normalize_query_roles(
+            "lineChart",
+            {
+                "Axis": [{"table": "Sales", "column": "Month"}],
+                "Values": [{"table": "Sales", "measure": "Revenue"}],
+                "Legend": [{"table": "Sales", "column": "Region"}],
+            },
+        )
+        self.assertEqual(set(normalized), {"Category", "Y", "Series"})
+        remap_pairs = {(r["from"], r["to"]) for r in remaps}
+        self.assertEqual(remap_pairs, {("Axis", "Category"), ("Values", "Y"), ("Legend", "Series")})
+
+    def test_normalize_query_roles_passes_canonical_and_unknown_through(self) -> None:
+        # Already-canonical roles and roles for non-mapped visual types are untouched.
+        normalized, remaps = normalize_query_roles(
+            "clusteredBarChart",
+            {"Category": [{"table": "S", "column": "C"}], "Y": [{"table": "S", "measure": "M"}]},
+        )
+        self.assertEqual(set(normalized), {"Category", "Y"})
+        self.assertEqual(remaps, [])
+
+        passthrough, remaps2 = normalize_query_roles("someCustomVisual", {"Foo": [1]})
+        self.assertEqual(passthrough, {"Foo": [1]})
+        self.assertEqual(remaps2, [])
+
+    def test_add_chart_visual_writes_canonical_roles(self) -> None:
+        with temp_dir() as temp:
+            report_dir = make_fixture(Path(temp))
+            report = PBIRReport(report_dir)
+
+            result = report.add_visual_from_template(
+                "Overview",
+                visual_type="clusteredBarChart",
+                name="SuppliersBar",
+                title="Suppliers",
+                query_roles={
+                    "Axis": [{"table": "Sales", "column": "Supplier"}],
+                    "Values": [{"table": "Sales", "measure": "Bills"}],
+                },
+                validate_after=True,
+            )
+            self.assertTrue(result["validation"]["ok"])
+            self.assertIn("role_remaps", result)
+
+            visual_path = report_dir / "definition" / "pages" / "Overview" / "visuals" / "SuppliersBar" / "visual.json"
+            query_state = json.loads(visual_path.read_text(encoding="utf-8"))["visual"]["query"]["queryState"]
+            self.assertEqual(set(query_state), {"Category", "Y"})
+            self.assertNotIn("Axis", query_state)
+            self.assertNotIn("Values", query_state)
+
+    def test_validate_warns_on_unrenderable_chart_roles(self) -> None:
+        with temp_dir() as temp:
+            report_dir = make_fixture(Path(temp))
+            report = PBIRReport(report_dir)
+            report.add_visual_from_template("Overview", template="card", name="ChartCard")
+
+            # Hand-author a chart that still carries the non-rendering Axis/Values roles
+            # (as Power BI Desktop never would) to confirm the validator flags it.
+            visual_path = report_dir / "definition" / "pages" / "Overview" / "visuals" / "ChartCard" / "visual.json"
+            visual_json = json.loads(visual_path.read_text(encoding="utf-8"))
+            visual_json["visual"]["visualType"] = "lineChart"
+            visual_json["visual"]["query"] = {
+                "queryState": {
+                    "Axis": {"projections": [{"field": {}, "queryRef": "Sales.Month"}]},
+                    "Values": {"projections": [{"field": {}, "queryRef": "Sales.Revenue"}]},
+                }
+            }
+            write_json(visual_path, visual_json)
+
+            validation = report.validate()
+            self.assertTrue(validation.ok, validation.errors)  # roles are a warning, not an error
+            self.assertTrue(
+                any("does not render" in w and "lineChart" in w for w in validation.warnings),
+                validation.warnings,
+            )
+
+    def test_unknown_query_roles_helper(self) -> None:
+        bad = unknown_query_roles(
+            "lineChart",
+            {"queryState": {"Axis": {}, "Y": {}}},
+        )
+        self.assertEqual(bad, ["Axis"])
+        self.assertEqual(unknown_query_roles("tableEx", {"queryState": {"Values": {}}}), [])
+        self.assertEqual(unknown_query_roles("customVisual", {"queryState": {"Anything": {}}}), [])
 
     def test_clone_and_reposition_visual(self) -> None:
         with temp_dir() as temp:
