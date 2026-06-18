@@ -212,6 +212,43 @@ class PBIRReportTests(unittest.TestCase):
             self.assertEqual(moved["visual"]["position"]["x"], 100.0)
             self.assertEqual(moved["visual"]["position"]["width"], 500.0)
 
+    def test_export_project_zip_scopes_to_one_project(self) -> None:
+        import zipfile
+        with temp_dir() as temp:
+            root = Path(temp)
+            report = PBIRReport.scaffold_project(folder=str(root), name="Sales")
+            # Decoys in the SAME parent folder that must NOT be swept into the bundle.
+            PBIRReport.scaffold_project(folder=str(root), name="Other")
+            (root / "stale.pbix").write_text("not a real pbix", encoding="utf-8")
+            # A local VertiPaq cache Desktop would write — must be excluded, not shipped.
+            cache = root / "Sales.SemanticModel" / ".pbi" / "cache.abf"
+            cache.parent.mkdir(parents=True, exist_ok=True)
+            cache.write_text("x" * 4096, encoding="utf-8")
+
+            result = report.export_project()
+            self.assertFalse(result["is_self_contained_pbix"])
+            self.assertIn("Sales.SemanticModel", result["included"])
+            self.assertIn("Sales.pbip", result["included"])
+
+            zip_path = Path(result["zip_path"])
+            self.assertTrue(zip_path.exists())
+            stage = Path(result["export_folder"])
+            self.assertTrue((stage / "Sales.pbip").exists())
+            self.assertTrue((stage / "Sales.Report").is_dir())
+            self.assertTrue((stage / "Sales.SemanticModel").is_dir())
+
+            names = [n.replace("\\", "/") for n in zipfile.ZipFile(zip_path).namelist()]
+            self.assertIn("Sales/Sales.pbip", names)
+            self.assertTrue(any(n.startswith("Sales/Sales.Report/") for n in names), names)
+            self.assertTrue(any(n.startswith("Sales/Sales.SemanticModel/") for n in names), names)
+            # Scoping: nothing from the sibling project or the stray pbix leaked in.
+            self.assertFalse(any("Other" in n for n in names), names)
+            self.assertFalse(any("stale.pbix" in n for n in names), names)
+            self.assertTrue(all(n.strip("/").startswith("Sales") for n in names if n.strip("/")), names)
+            # Local cache excluded, not shipped.
+            self.assertFalse(any(".pbi/" in n or n.endswith("cache.abf") for n in names), names)
+            self.assertFalse((stage / "Sales.SemanticModel" / ".pbi").exists())
+
     def test_manage_custom_theme(self) -> None:
         with temp_dir() as temp:
             report_dir = make_fixture(Path(temp))
