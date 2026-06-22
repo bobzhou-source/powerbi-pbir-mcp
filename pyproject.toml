@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "powerbi-pbir-mcp"
-version = "0.1.0"
+version = "0.2.0"
 description = "MCP server for editing Power BI PBIR report projects."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -32,6 +32,7 @@ Issues = "https://github.com/bobzhou-source/powerbi-pbir-mcp/issues"
 
 [project.scripts]
 powerbi-pbir-mcp = "pbir_mcp_server:run"
+powerbi-pbir-mcp-sse = "pbir_mcp_server:run_sse"
 
 [tool.setuptools]
 py-modules = ["pbir_mcp_server"]

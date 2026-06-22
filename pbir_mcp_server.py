@@ -75,6 +75,69 @@ _CARD_ROLES = {
     "values": "Values", "value": "Values", "y": "Values",
     "field": "Values", "fields": "Values", "data": "Values",
 }
+_CARD_V2_ROLES = {
+    "values": "Data", "value": "Data", "y": "Data",
+    "field": "Data", "fields": "Data", "data": "Data",
+    "referenceLabels": "ReferenceLabels", "referencelabels": "ReferenceLabels",
+    "reference_labels": "ReferenceLabels", "referencelabel": "ReferenceLabels",
+    "additionalMeasure": "AdditionalMeasure", "additionalmeasure": "AdditionalMeasure",
+    "additional_measure": "AdditionalMeasure", "additional": "AdditionalMeasure",
+}
+_COMBO_ROLES = {
+    "category": "Category", "x": "Category", "axis": "Category",
+    "columnY": "ColumnY", "columny": "ColumnY", "column_y": "ColumnY", "bar": "ColumnY", "column": "ColumnY",
+    "lineY": "LineY", "liney": "LineY", "line_y": "LineY", "line": "LineY",
+    "series": "Series", "legend": "Series",
+    "tooltips": "Tooltips", "tooltip": "Tooltips",
+}
+_WATERFALL_ROLES = {
+    "category": "Category", "x": "Category", "axis": "Category",
+    "y": "Y", "values": "Y", "value": "Y",
+    "breakdown": "Breakdown", "break": "Breakdown",
+    "tooltips": "Tooltips", "tooltip": "Tooltips",
+}
+_SCATTER_ROLES = {
+    "x": "X",
+    "y": "Y",
+    "size": "Size",
+    "details": "Details", "detail": "Details",
+    "legend": "Legend", "series": "Legend",
+    "tooltips": "Tooltips", "tooltip": "Tooltips",
+}
+_FUNNEL_ROLES = {
+    "category": "Category", "x": "Category", "axis": "Category",
+    "y": "Y", "values": "Y", "value": "Y",
+    "tooltips": "Tooltips", "tooltip": "Tooltips",
+}
+_TREEMAP_ROLES = {
+    "category": "Category", "details": "Category", "groups": "Category",
+    "values": "Values", "value": "Values", "y": "Values",
+    "tooltips": "Tooltips", "tooltip": "Tooltips",
+}
+_KPI_ROLES = {
+    "indicator": "Indicator", "value": "Indicator", "values": "Indicator", "y": "Indicator",
+    "trendLine": "TrendLine", "trendline": "TrendLine", "trend": "TrendLine", "trend_line": "TrendLine",
+    "goal": "Goal", "target": "Goal",
+    "tooltips": "Tooltips", "tooltip": "Tooltips",
+}
+_GAUGE_ROLES = {
+    "y": "Y", "value": "Y", "values": "Y", "indicator": "Y",
+    "minValue": "MinValue", "minvalue": "MinValue", "min": "MinValue", "min_value": "MinValue",
+    "maxValue": "MaxValue", "maxvalue": "MaxValue", "max": "MaxValue", "max_value": "MaxValue",
+    "targetValue": "TargetValue", "targetvalue": "TargetValue", "target": "TargetValue", "target_value": "TargetValue",
+    "tooltips": "Tooltips", "tooltip": "Tooltips",
+}
+_MAP_ROLES = {
+    "location": "Location", "category": "Location",
+    "size": "Size", "value": "Size", "values": "Size",
+    "tooltips": "Tooltips", "tooltip": "Tooltips",
+}
+_NO_DATA_ROLES: dict[str, str] = {}
+_ACTION_BUTTON_ROLES: dict[str, str] = {}
+_PAGE_NAV_ROLES: dict[str, str] = {}
+_ADV_SLICER_ROLES = {
+    "field": "Values", "fields": "Values", "values": "Values", "value": "Values",
+}
 _TABLE_ROLES = {
     "values": "Values", "value": "Values", "y": "Values",
     "columns": "Values", "column": "Values", "fields": "Values", "field": "Values",
@@ -91,6 +154,7 @@ _SLICER_ROLES = {
 VISUAL_ROLE_ALIASES: dict[str, dict[str, str]] = {
     "card": _CARD_ROLES,
     "multiRowCard": _CARD_ROLES,
+    "cardVisual": _CARD_V2_ROLES,
     "clusteredBarChart": _CARTESIAN_ROLES,
     "barChart": _CARTESIAN_ROLES,
     "stackedBarChart": _CARTESIAN_ROLES,
@@ -107,6 +171,23 @@ VISUAL_ROLE_ALIASES: dict[str, dict[str, str]] = {
     "tableEx": _TABLE_ROLES,
     "pivotTable": _MATRIX_ROLES,
     "slicer": _SLICER_ROLES,
+    "lineClusteredColumnComboChart": _COMBO_ROLES,
+    "lineStackedColumnComboChart": _COMBO_ROLES,
+    "actionButton": _ACTION_BUTTON_ROLES,
+    "pageNavigator": _PAGE_NAV_ROLES,
+    "advancedSlicerVisual": _ADV_SLICER_ROLES,
+    "waterfallChart": _WATERFALL_ROLES,
+    "scatterChart": _SCATTER_ROLES,
+    "bubbleChart": _SCATTER_ROLES,
+    "funnelChart": _FUNNEL_ROLES,
+    "treemap": _TREEMAP_ROLES,
+    "kpi": _KPI_ROLES,
+    "gauge": _GAUGE_ROLES,
+    "filledMap": _MAP_ROLES,
+    "azureMap": _MAP_ROLES,
+    "image": _NO_DATA_ROLES,
+    "shape": _NO_DATA_ROLES,
+    "textbox": _NO_DATA_ROLES,
 }
 # Visual-type lookups are case-insensitive.
 _VISUAL_ROLE_ALIASES_LC = {key.lower(): value for key, value in VISUAL_ROLE_ALIASES.items()}
@@ -336,18 +417,20 @@ def _get_color_expr(val: Any) -> str | None:
 
 
 _VTYPE_SHORT: dict[str, str] = {
-    "card": "card", "cardNew": "card", "slicer": "slicer",
+    "card": "card", "cardNew": "card", "cardVisual": "cardv2", "slicer": "slicer",
     "tableEx": "table", "pivotTable": "pivot",
     "lineChart": "line", "areaChart": "area",
     "clusteredBarChart": "bar", "barChart": "bar", "stackedBarChart": "bar",
     "clusteredColumnChart": "col", "columnChart": "col", "stackedColumnChart": "col",
-    "lineClusteredColumnComboChart": "combo", "lineStackedColumnComboChart": "combo",
+    "lineClusteredColumnComboChart": "combo", "lineStackedColumnComboChart": "combostack",
     "donutChart": "donut", "pieChart": "pie", "treemap": "tree",
     "filledMap": "map", "map": "map", "shapeMap": "map",
     "funnel": "funnel", "gauge": "gauge", "kpi": "kpi",
     "scatterChart": "scatter", "waterfallChart": "waterfall",
     "ribbonChart": "ribbon", "multiRowCard": "mcard",
     "textbox": "text", "image": "img", "shape": "shape",
+    "pageNavigator": "pagenav", "actionButton": "actionbtn", "advancedSlicerVisual": "advslicr",
+    "bubbleChart": "bubble", "funnelChart": "funnel", "azureMap": "azuremap",
 }
 
 
@@ -583,6 +666,19 @@ def build_pbi_theme(
     }
 
 
+def _to_pbi_literal(value: Any) -> str:
+    """Return a raw PBI literal string (no wrapping dict)."""
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    if isinstance(value, str):
+        return "'" + value.replace("'", "''") + "'"
+    if isinstance(value, float):
+        return f"{value}D"
+    if isinstance(value, int):
+        return f"{value}L"
+    return str(value)
+
+
 def pbir_literal(value: Any) -> dict[str, Any]:
     if isinstance(value, bool):
         literal = "true" if value else "false"
@@ -644,7 +740,17 @@ def scalar_position(position: dict[str, Any] | None, next_z: int = 0) -> dict[st
         result["z"] = int(next_z)
     if "tabOrder" in pos:
         result["tabOrder"] = int(pos["tabOrder"])
+    if "angle" in pos:
+        result["angle"] = float(pos["angle"])
     return result
+
+
+_DEFAULT_Z: dict[str, int] = {
+    "slicer": 500, "advancedSlicerVisual": 500,
+    "card": 1000, "cardNew": 1000, "cardVisual": 1000, "kpiVisual": 1000, "kpi": 1000, "multiRowCard": 1000,
+    "actionButton": 3000, "pageNavigator": 3000,
+}
+_DEFAULT_Z_FALLBACK = 2000
 
 
 def schema() -> dict[str, Any]:
@@ -1469,6 +1575,372 @@ class PBIRReport:
                 pass
         return result
 
+    @staticmethod
+    def extract_pbix(pbix_path: str | Path, output_dir: str | Path | None = None, overwrite: bool = False) -> dict[str, Any]:
+        """Extract a .pbix/.pbit package using zip semantics."""
+        import zipfile
+        src = Path(pbix_path).expanduser().resolve()
+        if not src.exists():
+            raise PBIRError(f"PBIX file does not exist: {src}")
+        dest = Path(output_dir).expanduser().resolve() if output_dir else src.with_suffix("")
+        if dest.exists():
+            if not overwrite:
+                raise PBIRError(f"Output folder already exists: {dest}")
+            if dest.parent == dest:
+                raise PBIRError(f"Refusing to overwrite filesystem root: {dest}")
+            shutil.rmtree(dest)
+        dest.mkdir(parents=True, exist_ok=True)
+        try:
+            with zipfile.ZipFile(src, "r") as zf:
+                infos = zf.infolist()
+                names = [info.filename for info in infos]
+                for info in infos:
+                    target = (dest / info.filename).resolve()
+                    if target != dest and dest not in target.parents:
+                        raise PBIRError(f"Unsafe archive member escapes output folder: {info.filename}")
+                zf.extractall(dest)
+        except zipfile.BadZipFile as exc:
+            raise PBIRError(f"Not a valid zip-backed PBIX/PBIT package: {src}") from exc
+        return {
+            "pbix_path": str(src),
+            "extract_dir": str(dest),
+            "file_count": len(names),
+            "files": names[:200],
+            "files_truncated": max(0, len(names) - 200),
+        }
+
+    @staticmethod
+    def package_pbix(source_dir: str | Path, output_path: str | Path, overwrite: bool = False) -> dict[str, Any]:
+        """Create a .pbix/.pbit package by zipping the extracted package folder contents."""
+        import zipfile
+        src = Path(source_dir).expanduser().resolve()
+        if not src.is_dir():
+            raise PBIRError(f"Source folder does not exist: {src}")
+        out = Path(output_path).expanduser().resolve()
+        if out.exists() and not overwrite:
+            raise PBIRError(f"Output file already exists: {out}")
+        out.parent.mkdir(parents=True, exist_ok=True)
+        count = 0
+        with zipfile.ZipFile(out, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+            for file in sorted(src.rglob("*")):
+                resolved = file.resolve()
+                if resolved == out:
+                    continue
+                if file.is_file():
+                    zf.write(file, file.relative_to(src).as_posix())
+                    count += 1
+        return {"source_dir": str(src), "pbix_path": str(out), "file_count": count, "size_kb": round(out.stat().st_size / 1024, 1)}
+
+    def journal_dir(self) -> Path:
+        return self.report_root.parent / f".{self.report_root.name}.pbir_mcp_journal"
+
+    def create_undo_snapshot(self, label: str = "manual", include_semantic_model: bool = True) -> dict[str, Any]:
+        import time
+        snap_id = time.strftime("%Y%m%d%H%M%S") + "_" + uuid.uuid4().hex[:8]
+        root = self.journal_dir()
+        snap = root / snap_id
+        snap.mkdir(parents=True, exist_ok=False)
+        ignore = shutil.ignore_patterns(".pbi", "cache.abf", "__pycache__", "*.pyc")
+        shutil.copytree(self.report_root, snap / self.report_root.name, ignore=ignore)
+        included = [self.report_root.name]
+        sm_path = self.semantic_model_path()
+        if include_semantic_model and sm_path and sm_path.exists():
+            shutil.copytree(sm_path, snap / sm_path.name, ignore=ignore)
+            included.append(sm_path.name)
+        manifest = {
+            "id": snap_id,
+            "label": label,
+            "created_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
+            "report_root": str(self.report_root),
+            "semantic_model_path": str(sm_path) if sm_path else None,
+            "included": included,
+        }
+        write_json(snap / "manifest.json", manifest)
+        return manifest
+
+    def list_undo_snapshots(self) -> list[dict[str, Any]]:
+        root = self.journal_dir()
+        if not root.exists():
+            return []
+        snapshots = []
+        for folder in sorted([p for p in root.iterdir() if p.is_dir()], key=lambda p: p.name):
+            manifest_path = folder / "manifest.json"
+            if manifest_path.exists():
+                try:
+                    snapshots.append(read_json(manifest_path))
+                    continue
+                except PBIRError:
+                    pass
+            snapshots.append({"id": folder.name, "path": str(folder)})
+        return snapshots
+
+    def undo_last_action(self, snapshot_id: str | None = None) -> dict[str, Any]:
+        snapshots = self.list_undo_snapshots()
+        if not snapshots:
+            raise PBIRError("No undo snapshots are available for this report.")
+        manifest = next((s for s in snapshots if s.get("id") == snapshot_id), None) if snapshot_id else snapshots[-1]
+        if not manifest:
+            raise PBIRError(f"Undo snapshot not found: {snapshot_id}")
+        snap = self.journal_dir() / str(manifest["id"])
+        report_copy = snap / self.report_root.name
+        if not report_copy.exists():
+            raise PBIRError(f"Undo snapshot is missing report copy: {report_copy}")
+        backup_root = self.journal_dir() / ("restore_backup_" + uuid.uuid4().hex[:8])
+        backup_root.mkdir(parents=True, exist_ok=False)
+        restored = []
+        try:
+            if self.report_root.exists():
+                shutil.move(str(self.report_root), str(backup_root / self.report_root.name))
+            shutil.copytree(report_copy, self.report_root)
+            restored.append(str(self.report_root))
+            sm_manifest = manifest.get("semantic_model_path")
+            if sm_manifest:
+                sm_path = Path(sm_manifest)
+                sm_copy = snap / sm_path.name
+                if sm_copy.exists():
+                    if sm_path.exists():
+                        shutil.move(str(sm_path), str(backup_root / sm_path.name))
+                    shutil.copytree(sm_copy, sm_path)
+                    restored.append(str(sm_path))
+        except Exception:
+            if not self.report_root.exists() and (backup_root / self.report_root.name).exists():
+                shutil.move(str(backup_root / self.report_root.name), str(self.report_root))
+            raise
+        shutil.rmtree(backup_root, ignore_errors=True)
+        return {"restored_snapshot": manifest, "restored": restored}
+
+    def audit_report(
+        self,
+        max_visuals_per_page: int = 20,
+        include_unused_measures: bool = True,
+        role_memberships: dict[str, list[str]] | None = None,
+    ) -> dict[str, Any]:
+        """Run report quality checks suited for automated editing workflows."""
+        issues: list[dict[str, Any]] = []
+        no_data_visuals = {"textbox", "image", "shape", "actionButton", "pageNavigator"}
+        pages = self.list_pages(include_visuals=False)["pages"]
+        all_visuals = self.list_visuals(include_bindings=True)["visuals"]
+        for page in pages:
+            if int(page.get("visual_count") or 0) > max_visuals_per_page:
+                issues.append({
+                    "severity": "warning",
+                    "code": "too_many_visuals",
+                    "page": page.get("name"),
+                    "message": f"Page has {page.get('visual_count')} visuals; threshold is {max_visuals_per_page}.",
+                })
+            try:
+                layout = self.page_layout_analysis(self.find_page_dir(str(page.get("name"))))
+                for item in layout.get("out_of_bounds", []):
+                    issues.append({"severity": "warning", "code": "layout_overflow", "page": page.get("name"), "visual": item})
+                for item in layout.get("overlaps", []):
+                    issues.append({"severity": "info", "code": "layout_overlap", "page": page.get("name"), **item})
+            except PBIRError as exc:
+                issues.append({"severity": "error", "code": "layout_audit_failed", "page": page.get("name"), "message": str(exc)})
+        for visual in all_visuals:
+            vt = str(visual.get("visualType") or "")
+            if vt not in no_data_visuals and not visual.get("bindings"):
+                issues.append({
+                    "severity": "warning",
+                    "code": "visual_without_bindings",
+                    "page": visual.get("page"),
+                    "visual": visual.get("name"),
+                    "visualType": vt,
+                })
+
+        used_measures = {
+            (str(b.get("table")), str(b.get("name")))
+            for visual in all_visuals
+            for b in (visual.get("bindings") or [])
+            if "measure" in str(b.get("kind", ""))
+        }
+        try:
+            sm = PBIRSemanticModel.from_report(self.report_root)
+            if sm:
+                roles = sm.list_roles()
+                if role_memberships is not None:
+                    for role in roles:
+                        members = role_memberships.get(role["name"], [])
+                        if not members:
+                            issues.append({"severity": "warning", "code": "rls_role_without_users", "role": role["name"]})
+                elif roles:
+                    issues.append({
+                        "severity": "info",
+                        "code": "rls_membership_unverified",
+                        "message": "Local TMDL does not store Power BI Service role membership; pass role_memberships or use service tools.",
+                        "role_count": len(roles),
+                    })
+            if include_unused_measures:
+                semantic = self.read_semantic_model()
+                for table in semantic.get("tables", []):
+                    tname = table.get("name")
+                    for measure in table.get("measures", []):
+                        key = (str(tname), str(measure.get("name")))
+                        if key not in used_measures:
+                            issues.append({"severity": "info", "code": "unused_measure", "table": key[0], "measure": key[1]})
+        except PBIRError as exc:
+            issues.append({"severity": "info", "code": "semantic_audit_skipped", "message": str(exc)})
+
+        counts: dict[str, int] = {}
+        for issue in issues:
+            counts[issue["severity"]] = counts.get(issue["severity"], 0) + 1
+        return {
+            "report_root": str(self.report_root),
+            "ok": counts.get("error", 0) == 0,
+            "issue_count": len(issues),
+            "counts": counts,
+            "issues": issues,
+        }
+
+    def render_preview(self, output_path: str | Path | None = None) -> dict[str, Any]:
+        """Render a lightweight HTML layout preview: page canvases, visual boxes, titles, and bindings."""
+        import html
+        out = Path(output_path).expanduser().resolve() if output_path else self.report_root.parent / f"{self.report_root.stem}_preview.html"
+        pages = self.list_pages(include_visuals=False)["pages"]
+        visuals = self.list_visuals(include_bindings=True)["visuals"]
+        by_page: dict[str, list[dict[str, Any]]] = {}
+        for visual in visuals:
+            by_page.setdefault(str(visual.get("page")), []).append(visual)
+        parts = [
+            "<!doctype html><meta charset='utf-8'><title>PBIR Preview</title>",
+            "<style>body{font-family:Segoe UI,Arial,sans-serif;background:#f3f4f6;color:#111827;margin:24px}"
+            ".page{position:relative;background:white;border:1px solid #d1d5db;margin:18px 0 36px;box-shadow:0 1px 4px #0002}"
+            ".visual{position:absolute;border:1px solid #2563eb;background:#dbeafe99;box-sizing:border-box;overflow:hidden;padding:6px;font-size:12px}"
+            ".title{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.meta{color:#374151;font-size:11px}</style>",
+            f"<h1>{html.escape(self.report_root.stem)} layout preview</h1>",
+        ]
+        max_width = 1100.0
+        for page in pages:
+            pw = float(page.get("width") or 1280)
+            ph = float(page.get("height") or 720)
+            scale = min(1.0, max_width / pw) if pw else 1.0
+            parts.append(f"<h2>{html.escape(str(page.get('displayName') or page.get('name')))}</h2>")
+            parts.append(f"<div class='page' style='width:{pw*scale:.1f}px;height:{ph*scale:.1f}px'>")
+            for v in by_page.get(str(page.get("name")), []):
+                pos = v.get("position") or {}
+                x, y = float(pos.get("x", 0)) * scale, float(pos.get("y", 0)) * scale
+                w, h = float(pos.get("width", 0)) * scale, float(pos.get("height", 0)) * scale
+                title = html.escape(str(v.get("title") or v.get("name") or ""))
+                vt = html.escape(str(v.get("visualType") or ""))
+                bindings = ", ".join(
+                    html.escape(f"{b.get('role')}:{b.get('table')}.{b.get('name')}")
+                    for b in (v.get("bindings") or [])[:3]
+                )
+                parts.append(f"<div class='visual' style='left:{x:.1f}px;top:{y:.1f}px;width:{w:.1f}px;height:{h:.1f}px'>"
+                             f"<div class='title'>{title}</div><div class='meta'>{vt}</div><div class='meta'>{bindings}</div></div>")
+            parts.append("</div>")
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text("\n".join(parts), encoding="utf-8")
+        return {"preview_path": str(out), "page_count": len(pages), "visual_count": len(visuals)}
+
+    def migrate_layout_to(
+        self,
+        target_project_path: str | Path,
+        overwrite_pages: bool = False,
+        remap_fields: bool = True,
+    ) -> dict[str, Any]:
+        """Copy report pages/visuals into another PBIR report, optionally remapping fields by name."""
+        target = PBIRReport(target_project_path)
+        try:
+            target_semantic = target.read_semantic_model() if remap_fields else {"tables": []}
+        except PBIRError:
+            target_semantic = {"tables": []}
+        fields_by_name: dict[tuple[str, str], list[str]] = {}
+        target_tables = {t.get("name") for t in target_semantic.get("tables", [])}
+        for table in target_semantic.get("tables", []):
+            tname = str(table.get("name"))
+            for col in table.get("columns", []):
+                fields_by_name.setdefault(("column", str(col.get("name")).lower()), []).append(tname)
+            for measure in table.get("measures", []):
+                fields_by_name.setdefault(("measure", str(measure.get("name")).lower()), []).append(tname)
+
+        def remap_visual_json(data: Any, remaps: list[dict[str, str]]) -> Any:
+            if isinstance(data, dict):
+                for node_name, kind in (("Measure", "measure"), ("Column", "column")):
+                    node = data.get(node_name)
+                    if isinstance(node, dict):
+                        prop = str(node.get("Property", ""))
+                        sr = ((node.get("Expression") or {}).get("SourceRef") or {})
+                        old_table = sr.get("Entity")
+                        candidates = fields_by_name.get((kind, prop.lower()), [])
+                        if old_table not in target_tables and len(candidates) == 1:
+                            sr["Entity"] = candidates[0]
+                            remaps.append({"kind": kind, "field": prop, "from_table": str(old_table), "to_table": candidates[0]})
+                for value in data.values():
+                    remap_visual_json(value, remaps)
+            elif isinstance(data, list):
+                for value in data:
+                    remap_visual_json(value, remaps)
+            return data
+
+        copied, skipped, field_remaps = [], [], []
+        source_metadata = self.load_pages_metadata()
+        target_metadata = target.load_pages_metadata()
+        order = list(target_metadata.get("pageOrder") or [])
+        for source_page in self.page_dirs():
+            if not (source_page / "page.json").exists():
+                continue
+            dest_page = target.pages_dir / source_page.name
+            if dest_page.exists():
+                if not overwrite_pages:
+                    skipped.append(source_page.name)
+                    continue
+                shutil.rmtree(dest_page)
+            shutil.copytree(source_page, dest_page)
+            if remap_fields:
+                for visual_json in dest_page.glob("visuals/*/visual.json"):
+                    data = read_json(visual_json)
+                    remaps: list[dict[str, str]] = []
+                    remap_visual_json(data, remaps)
+                    if remaps:
+                        write_json(visual_json, data)
+                        field_remaps.extend({"page": source_page.name, "visual": visual_json.parent.name, **r} for r in remaps)
+            if source_page.name not in order:
+                order.append(source_page.name)
+            copied.append(source_page.name)
+        target_metadata["pageOrder"] = order
+        if not target_metadata.get("activePageName") and source_metadata.get("activePageName") in order:
+            target_metadata["activePageName"] = source_metadata.get("activePageName")
+        target.save_pages_metadata(target_metadata)
+        return {
+            "source_report_root": str(self.report_root),
+            "target_report_root": str(target.report_root),
+            "copied_pages": copied,
+            "skipped_pages": skipped,
+            "field_remaps": field_remaps,
+            "validation": validation_summary(target.validate().as_dict(), include_messages=True),
+        }
+
+    def git_commit(self, message: str = "PBIR MCP snapshot") -> dict[str, Any]:
+        import subprocess
+        parent = self.report_root.parent
+        probe = subprocess.run(["git", "-C", str(parent), "rev-parse", "--show-toplevel"], text=True, capture_output=True)
+        if probe.returncode != 0:
+            raise PBIRError(f"Not inside a git repository: {parent}")
+        paths = [self.report_root.name]
+        sm = self.semantic_model_path()
+        if sm and sm.parent == parent:
+            paths.append(sm.name)
+        add = subprocess.run(["git", "-C", str(parent), "add", *paths], text=True, capture_output=True)
+        if add.returncode != 0:
+            raise PBIRError(add.stderr.strip() or add.stdout.strip())
+        commit = subprocess.run(["git", "-C", str(parent), "commit", "-m", message], text=True, capture_output=True)
+        if commit.returncode != 0:
+            raise PBIRError(commit.stderr.strip() or commit.stdout.strip())
+        rev = subprocess.run(["git", "-C", str(parent), "rev-parse", "--short", "HEAD"], text=True, capture_output=True)
+        return {"commit": rev.stdout.strip(), "message": message, "paths": paths}
+
+    def git_rollback(self, ref: str) -> dict[str, Any]:
+        import subprocess
+        parent = self.report_root.parent
+        paths = [self.report_root.name]
+        sm = self.semantic_model_path()
+        if sm and sm.parent == parent:
+            paths.append(sm.name)
+        result = subprocess.run(["git", "-C", str(parent), "checkout", ref, "--", *paths], text=True, capture_output=True)
+        if result.returncode != 0:
+            raise PBIRError(result.stderr.strip() or result.stdout.strip())
+        return {"rolled_back_to": ref, "paths": paths}
+
     def read_semantic_model(self) -> dict[str, Any]:
         """Parse the referenced SemanticModel and return tables, columns, and measures."""
         sm_path = self.semantic_model_path()
@@ -1617,6 +2089,7 @@ class PBIRReport:
         display_option: str = "FitToPage",
         make_active: bool = False,
         background: dict[str, Any] | None = None,
+        visibility: str | None = None,
         validate_after: bool = False,
     ) -> dict[str, Any]:
         page_name = normalize_object_name(name or object_name("ReportSection"), "page name")
@@ -1636,6 +2109,8 @@ class PBIRReport:
         }
         if background:
             page["objects"] = {"background": [{"properties": background}]}
+        if visibility:
+            page["visibility"] = visibility
         write_json(page_dir / "page.json", page)
 
         metadata = self.load_pages_metadata()
@@ -1659,6 +2134,7 @@ class PBIRReport:
         width: float | None = None,
         height: float | None = None,
         display_option: str | None = None,
+        visibility: str | None = None,
         validate_after: bool = False,
     ) -> dict[str, Any]:
         page_dir = self.find_page_dir(page)
@@ -1671,6 +2147,11 @@ class PBIRReport:
             page_data["height"] = float(height)
         if display_option is not None:
             page_data["displayOption"] = display_option
+        if visibility is not None:
+            if visibility == "":
+                page_data.pop("visibility", None)
+            else:
+                page_data["visibility"] = visibility
         write_json(page_dir / "page.json", page_data)
         result: dict[str, Any] = {"page": self.page_summary(page_dir)}
         if validate_after:
@@ -1907,6 +2388,8 @@ class PBIRReport:
         position: dict[str, Any] | None = None,
         visual_type: str | None = None,
         query_roles: dict[str, Any] | None = None,
+        sort: list[dict[str, Any]] | None = None,
+        filter_config: list[dict[str, Any]] | None = None,
         properties: dict[str, Any] | None = None,
         raw_patch: dict[str, Any] | None = None,
         validate_after: bool = False,
@@ -1918,10 +2401,11 @@ class PBIRReport:
             raise PBIRError(f"Visual already exists: {visual_name}")
 
         visual_kind = visual_type or self.visual_type_for_template(template)
+        _z_seed = max(self.next_visual_z(page_dir), _DEFAULT_Z.get(visual_kind, _DEFAULT_Z_FALLBACK))
         visual_json: dict[str, Any] = {
             "$schema": VISUAL_CONTAINER_SCHEMA,
             "name": visual_name,
-            "position": scalar_position(position, self.next_visual_z(page_dir)),
+            "position": scalar_position(position, _z_seed),
             "visual": {
                 "visualType": visual_kind,
                 "drillFilterOtherVisuals": True,
@@ -1937,10 +2421,16 @@ class PBIRReport:
         role_remaps: list[dict[str, str]] = []
         if query_roles:
             query_roles, role_remaps = normalize_query_roles(visual_kind, query_roles)
-            visual_config["query"] = self.build_query(query_roles)
+            visual_config["query"] = self.build_query(query_roles, sort=sort)
+        elif sort:
+            visual_config["query"] = self.build_query({}, sort=sort)
         if properties:
             visual_config.setdefault("objects", {})
             deep_merge(visual_config["objects"], properties)
+        if filter_config:
+            visual_json["filterConfig"] = {
+                "filters": [self.build_visual_filter(f) for f in filter_config]
+            }
         if raw_patch:
             deep_merge(visual_json, raw_patch)
 
@@ -1960,6 +2450,8 @@ class PBIRReport:
         mapping = {
             "blank": "card",
             "card": "card",
+            "cardVisual": "cardVisual",
+            "cardv2": "cardVisual",
             "bar": "clusteredBarChart",
             "barChart": "clusteredBarChart",
             "clusteredBarChart": "clusteredBarChart",
@@ -1972,6 +2464,36 @@ class PBIRReport:
             "matrix": "pivotTable",
             "slicer": "slicer",
             "textbox": "textbox",
+            "combo": "lineClusteredColumnComboChart",
+            "comboChart": "lineClusteredColumnComboChart",
+            "lineClusteredColumnComboChart": "lineClusteredColumnComboChart",
+            "combostack": "lineStackedColumnComboChart",
+            "lineStackedColumnComboChart": "lineStackedColumnComboChart",
+            "actionButton": "actionButton",
+            "actionbtn": "actionButton",
+            "button": "actionButton",
+            "pageNavigator": "pageNavigator",
+            "pagenav": "pageNavigator",
+            "advancedSlicerVisual": "advancedSlicerVisual",
+            "advslicr": "advancedSlicerVisual",
+            "buttonSlicer": "advancedSlicerVisual",
+            "waterfallChart": "waterfallChart",
+            "waterfall": "waterfallChart",
+            "scatterChart": "scatterChart",
+            "scatter": "scatterChart",
+            "bubbleChart": "bubbleChart",
+            "bubble": "bubbleChart",
+            "funnelChart": "funnelChart",
+            "funnel": "funnelChart",
+            "treemap": "treemap",
+            "kpi": "kpi",
+            "gauge": "gauge",
+            "filledMap": "filledMap",
+            "filledmap": "filledMap",
+            "azureMap": "azureMap",
+            "azuremap": "azureMap",
+            "image": "image",
+            "shape": "shape",
         }
         if template not in mapping:
             raise PBIRError(f"Unknown template '{template}'. Use one of: {', '.join(sorted(mapping))}")
@@ -1989,7 +2511,10 @@ class PBIRReport:
         }
 
     @staticmethod
-    def build_query(query_roles: dict[str, Any]) -> dict[str, Any]:
+    def build_query(
+        query_roles: dict[str, Any],
+        sort: list[dict[str, Any]] | None = None,
+    ) -> dict[str, Any]:
         query_state: dict[str, Any] = {}
         for role, projections in query_roles.items():
             if not isinstance(projections, list):
@@ -1997,7 +2522,12 @@ class PBIRReport:
             query_state[role] = {
                 "projections": [PBIRReport.build_projection(projection) for projection in projections]
             }
-        return {"queryState": query_state}
+        result: dict[str, Any] = {"queryState": query_state}
+        if sort:
+            result["sortDefinition"] = {
+                "sort": [PBIRReport.build_sort_entry(s) for s in sort]
+            }
+        return result
 
     @staticmethod
     def build_projection(spec: dict[str, Any]) -> dict[str, Any]:
@@ -2006,6 +2536,21 @@ class PBIRReport:
             if "queryRef" not in raw:
                 raise PBIRError("Raw projection must include queryRef.")
             return raw
+        if "native_calc" in spec:
+            nc = spec["native_calc"]
+            nc_name = nc if isinstance(nc, str) else nc.get("name", "")
+            if not nc_name:
+                raise PBIRError("native_calc projection must include a name.")
+            nc_expr = nc.get("expression") if isinstance(nc, dict) else None
+            nc_field: dict[str, Any] = {"NativeVisualCalculation": {"Name": nc_name}}
+            if nc_expr:
+                nc_field["NativeVisualCalculation"]["Expression"] = nc_expr
+            nc_qr = spec.get("queryRef") or nc_name
+            nc_proj: dict[str, Any] = {"field": nc_field, "queryRef": nc_qr}
+            for optional in ("nativeQueryRef", "displayName", "format", "active", "hidden"):
+                if optional in spec:
+                    nc_proj[optional] = spec[optional]
+            return nc_proj
         table = spec.get("table")
         if not table:
             raise PBIRError("Projection must include table, or use raw.")
@@ -2035,8 +2580,54 @@ class PBIRReport:
                 }
             else:
                 field = column_field
+        elif "hierarchy_level" in spec:
+            hl = spec["hierarchy_level"]
+            level = hl["level"]
+            hierarchy = hl.get("hierarchy", "Date Hierarchy")
+            variation_name = hl.get("variation_name", "Variation")
+            variation_property = hl.get("variation_property", "Date")
+            if hl.get("auto_date", True):
+                field = {
+                    "HierarchyLevel": {
+                        "Expression": {
+                            "Hierarchy": {
+                                "Expression": {
+                                    "PropertyVariationSource": {
+                                        "Expression": {"SourceRef": {"Entity": table}},
+                                        "Name": variation_name,
+                                        "Property": variation_property,
+                                    }
+                                },
+                                "Hierarchy": hierarchy,
+                            }
+                        },
+                        "Level": level,
+                    }
+                }
+                query_ref = spec.get("queryRef") or (
+                    f"{table}.{variation_property}.{variation_name}.{hierarchy}.{level}"
+                )
+            else:
+                hierarchy_column = hl["column"]
+                field = {
+                    "HierarchyLevel": {
+                        "Expression": {
+                            "Hierarchy": {
+                                "Expression": {"SourceRef": {"Entity": table}},
+                                "Hierarchy": hierarchy,
+                            }
+                        },
+                        "Level": level,
+                    }
+                }
+                query_ref = spec.get("queryRef") or f"{table}.{hierarchy_column}.{hierarchy}.{level}"
+            result = {"field": field, "queryRef": query_ref}
+            for optional in ("nativeQueryRef", "displayName", "format", "active", "hidden"):
+                if optional in spec:
+                    result[optional] = spec[optional]
+            return result
         else:
-            raise PBIRError("Projection must include measure or column.")
+            raise PBIRError("Projection must include measure, column, hierarchy_level, or native_calc.")
         query_ref = spec.get("queryRef") or f"{table}.{field_name}"
         result = {"field": field, "queryRef": query_ref}
         for optional in ("nativeQueryRef", "displayName", "format", "active", "hidden"):
@@ -2065,6 +2656,185 @@ class PBIRReport:
         if key not in mapping:
             raise PBIRError(f"Unknown aggregate '{name}'.")
         return mapping[key]
+
+    @staticmethod
+    def build_sort_entry(spec: dict[str, Any]) -> dict[str, Any]:
+        direction = spec.get("direction", "Descending")
+        if direction.lower() in ("asc", "ascending"):
+            direction = "Ascending"
+        else:
+            direction = "Descending"
+        field = PBIRReport.build_projection(spec)["field"]
+        return {"field": field, "direction": direction}
+
+    @staticmethod
+    def build_visual_filter(spec: dict[str, Any]) -> dict[str, Any]:
+        filter_type = spec.get("type", "Categorical")
+        field_proj = PBIRReport.build_projection(spec)
+        field = field_proj["field"]
+        entry: dict[str, Any] = {
+            "name": object_name("filter"),
+            "field": field,
+            "type": filter_type,
+        }
+        if "filter" in spec:
+            entry["filter"] = spec["filter"]
+            return entry
+
+        table = spec.get("table", "")
+        alias = table[0].lower() if table else "t"
+        from_entry = {"Name": alias, "Entity": table, "Type": 0}
+        filter_def: dict[str, Any] = {"Version": 2, "From": [from_entry], "Where": []}
+
+        def _alias_field(f: dict[str, Any]) -> dict[str, Any]:
+            import copy as _copy
+            af = _copy.deepcopy(f)
+            for node in [af.get("Measure"), af.get("Column"), af.get("HierarchyLevel")]:
+                if node and isinstance(node.get("Expression"), dict):
+                    sr = node["Expression"].get("SourceRef")
+                    if sr:
+                        sr.pop("Entity", None)
+                        sr["Source"] = alias
+                    pv = node["Expression"].get("PropertyVariationSource")
+                    if pv:
+                        pv.get("Expression", {}).get("SourceRef", {}).pop("Entity", None)
+                        pv["Expression"]["SourceRef"]["Source"] = alias
+            if "HierarchyLevel" in af:
+                hl_node = af["HierarchyLevel"]
+                h_expr = hl_node.get("Expression", {}).get("Hierarchy", {}).get("Expression", {})
+                pv2 = h_expr.get("PropertyVariationSource")
+                if pv2:
+                    pv2.get("Expression", {}).get("SourceRef", {}).pop("Entity", None)
+                    pv2["Expression"]["SourceRef"]["Source"] = alias
+            return af
+
+        aliased_field = _alias_field(field)
+
+        kind = spec.get("filter_kind", "in")
+        if kind in ("in", "not_in"):
+            values = spec.get("values", [])
+            where_cond: dict[str, Any] = {
+                "Condition": {
+                    "In": {
+                        "Expressions": [aliased_field],
+                        "Values": [[{"Literal": {"Value": _to_pbi_literal(v)}} for v in values] if values else []],
+                    }
+                }
+            }
+            if kind == "not_in":
+                where_cond = {"Condition": {"Not": {"Expression": where_cond["Condition"]}}}
+        elif kind == "comparison":
+            op_map = {
+                "eq": 0, "=": 0, "==": 0,
+                "lt": 1, "<": 1,
+                "le": 2, "<=": 2,
+                "ge": 3, ">=": 3,
+                "gt": 4, ">": 4,
+                "ne": 5, "!=": 5, "<>": 5,
+            }
+            op_key = str(spec.get("operator", "ge")).lower()
+            comparison_kind = op_map.get(op_key, 3)
+            where_cond = {
+                "Condition": {
+                    "Comparison": {
+                        "ComparisonKind": comparison_kind,
+                        "Left": aliased_field,
+                        "Right": {"Literal": {"Value": _to_pbi_literal(spec["value"])}},
+                    }
+                }
+            }
+        elif kind == "range":
+            # Range: min_value / max_value with optional include_min / include_max (default True)
+            range_conditions: list[dict[str, Any]] = []
+            if "min_value" in spec:
+                op_kind = 2 if spec.get("include_min", True) else 1  # >= or >
+                range_conditions.append({
+                    "Comparison": {
+                        "ComparisonKind": op_kind,
+                        "Left": aliased_field,
+                        "Right": {"Literal": {"Value": _to_pbi_literal(spec["min_value"])}},
+                    }
+                })
+            if "max_value" in spec:
+                op_kind = 4 if spec.get("include_max", True) else 3  # <= or <
+                range_conditions.append({
+                    "Comparison": {
+                        "ComparisonKind": op_kind,
+                        "Left": aliased_field,
+                        "Right": {"Literal": {"Value": _to_pbi_literal(spec["max_value"])}},
+                    }
+                })
+            if not range_conditions:
+                raise PBIRError("Range filter requires min_value and/or max_value.")
+            if len(range_conditions) == 1:
+                range_cond = range_conditions[0]
+            else:
+                range_cond = {"And": {"Left": {"Condition": range_conditions[0]}, "Right": {"Condition": range_conditions[1]}}}
+            where_cond = {"Condition": range_cond}
+            entry["type"] = spec.get("type", "Advanced")
+        elif kind == "top_n":
+            by_table = spec.get("by_table") or table
+            by_measure = spec.get("by_measure")
+            if not by_measure:
+                raise PBIRError("TopN filter requires by_measure.")
+            by_expr = {
+                "Measure": {
+                    "Expression": {"SourceRef": {"Entity": by_table}},
+                    "Property": by_measure,
+                }
+            }
+            direction = "Bottom" if spec.get("bottom") else "Top"
+            where_cond = {
+                "Condition": {
+                    "TopN": {
+                        "Direction": direction,
+                        "Count": int(spec["top_n"]),
+                        "Expression": aliased_field,
+                        "OrderBy": [{"Direction": "Descending", "Expression": by_expr}],
+                    }
+                }
+            }
+            entry["type"] = spec.get("type", "TopN")
+        elif kind == "relative_date":
+            rd = spec.get("relative_date", spec)
+            _period_map = {
+                "days": 0, "weeks": 1, "months": 2, "years": 3,
+                "calendarWeeks": 4, "calendarMonths": 5, "calendarYears": 6,
+                "calendarweeks": 4, "calendarmonths": 5, "calendaryears": 6,
+            }
+            _dir_map = {"last": 0, "previous": 0, "next": 1, "this": 2, "current": 2}
+            period_str = rd.get("period", "days") if isinstance(rd, dict) else spec.get("period", "days")
+            period_code = _period_map.get(period_str)
+            if period_code is None:
+                raise PBIRError(f"RelativeDate period must be one of {list(_period_map.keys())}, got '{period_str}'.")
+            direction_str = (rd.get("direction", "last") if isinstance(rd, dict) else spec.get("direction", "last"))
+            direction_code = _dir_map.get(direction_str)
+            if direction_code is None:
+                raise PBIRError(f"RelativeDate direction must be 'last', 'next', or 'this', got '{direction_str}'.")
+            count = (rd.get("count", 1) if isinstance(rd, dict) else spec.get("count", 1))
+            include_today = (rd.get("include_today", False) if isinstance(rd, dict) else spec.get("include_today", False))
+            where_cond = {
+                "Condition": {
+                    "RelativeDate": {
+                        "FilterType": direction_code,
+                        "Period": period_code,
+                        "TimeUnitsCount": count,
+                        "IncludeToday": include_today,
+                        "Expression": aliased_field,
+                    }
+                }
+            }
+            entry["type"] = spec.get("type", "RelativeDate")
+        else:
+            raise PBIRError(f"Unknown filter_kind '{kind}'. Use in, not_in, comparison, range, top_n, or relative_date.")
+
+        filter_def["Where"].append(where_cond)
+        entry["filter"] = filter_def
+        if spec.get("isHiddenInViewMode"):
+            entry["isHiddenInViewMode"] = True
+        if spec.get("isLockedInViewMode"):
+            entry["isLockedInViewMode"] = True
+        return entry
 
     def clone_visual(
         self,
@@ -2208,11 +2978,580 @@ class PBIRReport:
     def delete_visual(self, page: str, visual: str, validate_after: bool = False) -> dict[str, Any]:
         page_dir = self.find_page_dir(page)
         visual_dir = self.find_visual_dir(page_dir, visual)
-        for child in visual_dir.iterdir():
-            if child.is_file():
-                child.unlink()
-        visual_dir.rmdir()
+        shutil.rmtree(visual_dir)
         result: dict[str, Any] = {"deleted": str(visual_dir)}
+        if validate_after:
+            result["validation"] = validation_summary(self.validate().as_dict())
+        return result
+
+    def set_visual_filter(
+        self,
+        page: str,
+        visual: str,
+        filters: list[dict[str, Any]],
+        merge: bool = False,
+        validate_after: bool = False,
+    ) -> dict[str, Any]:
+        page_dir = self.find_page_dir(page)
+        visual_dir = self.find_visual_dir(page_dir, visual)
+        path = visual_dir / "visual.json"
+        data = read_json(path)
+        new_filters = [self.build_visual_filter(f) for f in filters]
+        if merge:
+            existing = data.setdefault("filterConfig", {}).setdefault("filters", [])
+            existing.extend(new_filters)
+        else:
+            data["filterConfig"] = {"filters": new_filters}
+        write_json(path, data)
+        result: dict[str, Any] = {"visual": self.visual_summary(page_dir, visual_dir)}
+        if validate_after:
+            result["validation"] = validation_summary(self.validate().as_dict())
+        return result
+
+    def set_page_filter(
+        self,
+        page: str,
+        filters: list[dict[str, Any]],
+        validate_after: bool = False,
+    ) -> dict[str, Any]:
+        """Set or replace page-level filters. Pass [] to clear all page filters."""
+        page_dir = self.find_page_dir(page)
+        path = page_dir / "page.json"
+        data = read_json(path)
+        built = [self.build_visual_filter(f) for f in filters]
+        if built:
+            data["filterConfig"] = {"filters": built}
+        else:
+            data.pop("filterConfig", None)
+        write_json(path, data)
+        result: dict[str, Any] = {
+            "page": page_dir.name,
+            "filter_count": len(built),
+        }
+        if validate_after:
+            result["validation"] = validation_summary(self.validate().as_dict())
+        return result
+
+    def manage_visual_calc(
+        self,
+        page: str,
+        visual: str,
+        action: str,
+        role: str,
+        name: str | None = None,
+        expression: dict[str, Any] | None = None,
+        validate_after: bool = False,
+    ) -> dict[str, Any]:
+        """Add, remove, or list NativeVisualCalculation projections on a visual."""
+        page_dir = self.find_page_dir(page)
+        visual_dir = self.find_visual_dir(page_dir, visual)
+        path = visual_dir / "visual.json"
+        data = read_json(path)
+
+        query_state = data.get("visual", {}).get("query", {}).get("queryState", {})
+
+        if action == "list":
+            found = []
+            for r, role_data in query_state.items():
+                for p in role_data.get("projections", []):
+                    if "NativeVisualCalculation" in p.get("field", {}):
+                        found.append({"role": r, "queryRef": p.get("queryRef"), "field": p["field"]})
+            return {"visual": visual, "native_calcs": found}
+
+        if action == "add":
+            if not name:
+                raise PBIRError("name is required for action='add'.")
+            proj = self.build_projection({"native_calc": {"name": name, "expression": expression} if expression else name})
+            role_data = query_state.setdefault(role, {"projections": []})
+            role_data.setdefault("projections", []).append(proj)
+            if "query" not in data.get("visual", {}):
+                data.setdefault("visual", {})["query"] = {"queryState": query_state}
+            else:
+                data["visual"]["query"]["queryState"] = query_state
+            write_json(path, data)
+            result: dict[str, Any] = {"action": "added", "visual": visual, "role": role, "name": name}
+            if validate_after:
+                result["validation"] = validation_summary(self.validate().as_dict())
+            return result
+
+        if action == "remove":
+            if not name:
+                raise PBIRError("name is required for action='remove'.")
+            removed = 0
+            for r, role_data in query_state.items():
+                before = role_data.get("projections", [])
+                after = [p for p in before if not (
+                    "NativeVisualCalculation" in p.get("field", {}) and
+                    p.get("queryRef") == name
+                )]
+                if len(after) < len(before):
+                    role_data["projections"] = after
+                    removed += len(before) - len(after)
+            if removed:
+                data["visual"]["query"]["queryState"] = query_state
+                write_json(path, data)
+            result = {"action": "removed", "visual": visual, "name": name, "removed_count": removed}
+            if validate_after:
+                result["validation"] = validation_summary(self.validate().as_dict())
+            return result
+
+        raise PBIRError(f"Unknown action '{action}'. Use add, remove, or list.")
+
+    # ── Bookmarks ─────────────────────────────────────────────────────────────
+
+    @property
+    def bookmarks_dir(self) -> Path:
+        return self.definition_dir / "bookmarks"
+
+    @property
+    def bookmarks_index(self) -> Path:
+        return self.bookmarks_dir / "bookmarks.json"
+
+    def list_bookmarks(self) -> list[dict[str, Any]]:
+        """Return all bookmarks from the bookmarks index."""
+        if not self.bookmarks_index.exists():
+            return []
+        index = read_json(self.bookmarks_index)
+        order: list[str] = index.get("bookmarkOrder", [])
+        result = []
+        for name in order:
+            bm_path = self.bookmarks_dir / name / "bookmark.json"
+            if bm_path.exists():
+                bm = read_json(bm_path)
+                result.append({
+                    "name": bm.get("name", name),
+                    "displayName": bm.get("displayName", name),
+                    "path": str(bm_path),
+                })
+            else:
+                result.append({"name": name, "displayName": name, "path": None})
+        return result
+
+    def manage_bookmark(
+        self,
+        action: str,
+        name: str | None = None,
+        display_name: str | None = None,
+        page: str | None = None,
+        visible_visuals: list[str] | None = None,
+        hidden_visuals: list[str] | None = None,
+        validate_after: bool = False,
+    ) -> dict[str, Any]:
+        """Create, delete, or list bookmarks.
+
+        action='create': create a visibility bookmark. name required.
+        action='delete': remove bookmark by name.
+        action='list': return all bookmarks.
+        """
+        if action == "list":
+            return {"bookmarks": self.list_bookmarks()}
+
+        if not name:
+            raise PBIRError("name is required for bookmark create/delete.")
+
+        if action == "delete":
+            bm_dir = self.bookmarks_dir / name
+            if bm_dir.exists():
+                shutil.rmtree(bm_dir)
+            if self.bookmarks_index.exists():
+                index = read_json(self.bookmarks_index)
+                order = [n for n in index.get("bookmarkOrder", []) if n != name]
+                index["bookmarkOrder"] = order
+                write_json(self.bookmarks_index, index)
+            result: dict[str, Any] = {"action": "deleted", "name": name}
+            if validate_after:
+                result["validation"] = validation_summary(self.validate().as_dict())
+            return result
+
+        if action == "create":
+            bm_name = name
+            bm_display = display_name or name
+            entities: dict[str, Any] = {}
+            if page and (visible_visuals or hidden_visuals):
+                page_dir = self.find_page_dir(page)
+                page_data = read_json(page_dir / "page.json")
+                page_internal_name = page_data.get("name", page_dir.name)
+                visual_containers: dict[str, Any] = {}
+                for vn in (visible_visuals or []):
+                    visual_containers[vn] = {"singleVisual": {"display": {"mode": "visible"}}}
+                for vn in (hidden_visuals or []):
+                    visual_containers[vn] = {"singleVisual": {"display": {"mode": "hidden"}}}
+                if visual_containers:
+                    entities[page_internal_name] = {"visualContainers": visual_containers}
+
+            bm_data: dict[str, Any] = {
+                "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/bookmark/1.0.0/schema.json",
+                "name": bm_name,
+                "displayName": bm_display,
+            }
+            if entities:
+                bm_data["explorationState"] = {"entities": entities}
+
+            bm_dir = self.bookmarks_dir / bm_name
+            bm_dir.mkdir(parents=True, exist_ok=True)
+            write_json(bm_dir / "bookmark.json", bm_data)
+
+            # Update bookmarks index
+            self.bookmarks_dir.mkdir(parents=True, exist_ok=True)
+            if self.bookmarks_index.exists():
+                index = read_json(self.bookmarks_index)
+            else:
+                index = {"bookmarkOrder": []}
+            order = list(index.get("bookmarkOrder", []))
+            if bm_name not in order:
+                order.append(bm_name)
+            index["bookmarkOrder"] = order
+            write_json(self.bookmarks_index, index)
+
+            result = {"action": "created", "name": bm_name, "displayName": bm_display}
+            if validate_after:
+                result["validation"] = validation_summary(self.validate().as_dict())
+            return result
+
+        raise PBIRError(f"Unknown bookmark action '{action}'. Use create, delete, or list.")
+
+    # ── Conditional Formatting ─────────────────────────────────────────────────
+
+    # Maps shorthand target names to (objects_section, property_name) tuples.
+    # Callers can also pass "section.property" directly for full control.
+    _CF_TARGET_PATH: dict[str, tuple[str, str]] = {
+        "backColor": ("values", "backColor"),
+        "fontColor": ("values", "fontColor"),
+        "fill": ("dataPoint", "fill"),
+        "dataPointColor": ("dataPoint", "color"),
+        "calloutValue": ("calloutValue", "color"),
+        "titleFontColor": ("title", "fontColor"),
+        "labelColor": ("labels", "color"),
+    }
+    # Targets that live in visualContainerObjects, not objects
+    _CF_VCO_TARGETS: frozenset[str] = frozenset({"titleFontColor", "titleBackground"})
+
+    def set_conditional_format(
+        self,
+        page: str,
+        visual: str,
+        target: str,
+        format_type: str,
+        spec: dict[str, Any],
+        validate_after: bool = False,
+    ) -> dict[str, Any]:
+        """Bind conditional formatting to a visual property.
+
+        target: shorthand key from _CF_TARGET_PATH (e.g. 'backColor', 'calloutValue')
+                or 'section.property' (e.g. 'values.backColor', 'dataPoint.fill').
+        format_type: 'measure' | 'column' | 'clear'
+          'measure': spec = {table, measure}
+          'column':  spec = {table, column, aggregate: 0-5}
+          'clear':   remove the target property entirely
+
+        gradient and rules conditional formatting must be set via raw_patch on the visual
+        (the PBIR expression structure is too complex to template reliably).
+        """
+        if format_type in ("gradient", "rules"):
+            raise PBIRError(
+                f"format_type='{format_type}' must be set via raw_patch on the visual. "
+                "Build the LinearGradient2 or Rules expression manually and pass it as "
+                "raw_patch={'visual': {'objects': {'<section>': [{'properties': {'<prop>': {...}}}]}}}."
+            )
+
+        page_dir = self.find_page_dir(page)
+        visual_dir = self.find_visual_dir(page_dir, visual)
+        path = visual_dir / "visual.json"
+        data = read_json(path)
+
+        # Resolve section + property from target
+        if target in self._CF_TARGET_PATH:
+            section, prop = self._CF_TARGET_PATH[target]
+        elif "." in target:
+            section, prop = target.split(".", 1)
+        else:
+            section, prop = target, target
+
+        use_vco = target in self._CF_VCO_TARGETS
+        vis = data.setdefault("visual", {})
+        objects: dict[str, Any] = vis.setdefault("visualContainerObjects" if use_vco else "objects", {})
+
+        if format_type == "clear":
+            section_list = objects.get(section, [])
+            if section_list and isinstance(section_list, list) and section_list[0].get("properties", {}).get(prop) is not None:
+                del section_list[0]["properties"][prop]
+                if not section_list[0]["properties"]:
+                    objects.pop(section, None)
+            write_json(path, data)
+            result: dict[str, Any] = {"action": "cleared", "target": target, "visual": visual}
+            if validate_after:
+                result["validation"] = validation_summary(self.validate().as_dict())
+            return result
+
+        # Build the color expression
+        table = spec.get("table")
+        if not table:
+            raise PBIRError("spec must include table.")
+
+        if format_type == "measure":
+            measure = spec.get("measure")
+            if not measure:
+                raise PBIRError("spec must include measure for format_type='measure'.")
+            color_expr: dict[str, Any] = {
+                "Measure": {
+                    "Expression": {"SourceRef": {"Entity": table}},
+                    "Property": measure,
+                }
+            }
+        elif format_type == "column":
+            column = spec.get("column")
+            if not column:
+                raise PBIRError("spec must include column for format_type='column'.")
+            col_expr: dict[str, Any] = {
+                "Column": {
+                    "Expression": {"SourceRef": {"Entity": table}},
+                    "Property": column,
+                }
+            }
+            aggregate = spec.get("aggregate")
+            if aggregate is not None:
+                color_expr = {"Aggregation": {"Expression": col_expr, "Function": int(aggregate)}}
+            else:
+                color_expr = col_expr
+        else:
+            raise PBIRError(f"Unknown format_type '{format_type}'. Use measure, column, or clear.")
+
+        wrapped: dict[str, Any] = {
+            "solid": {"color": {"expr": color_expr}}
+        }
+
+        section_list: list[dict[str, Any]] = objects.setdefault(section, [{}])
+        if not section_list:
+            section_list.append({})
+            objects[section] = section_list
+        section_list[0].setdefault("properties", {})[prop] = wrapped
+
+        write_json(path, data)
+        result = {"action": "set", "target": target, "format_type": format_type, "visual": visual}
+        if validate_after:
+            result["validation"] = validation_summary(self.validate().as_dict())
+        return result
+
+    # ── Bulk Visual Ops ────────────────────────────────────────────────────────
+
+    def bulk_visual_op(
+        self,
+        page: str,
+        op: str,
+        filter_type: str | None = None,
+        filter_name: str | None = None,
+        filter_bounds: dict[str, Any] | None = None,
+        update: dict[str, Any] | None = None,
+        validate_after: bool = False,
+    ) -> dict[str, Any]:
+        """Apply an operation to all visuals on a page matching the given filters.
+
+        op: 'list' | 'delete' | 'hide' | 'show' | 'update_title' | 'update_position'
+        filter_type: match visuals whose visualType equals this string
+        filter_name: match visuals whose name contains this substring
+        filter_bounds: dict with optional x_min/x_max/y_min/y_max keys to filter by position
+        update: for update_title: {'title': '...'}, for update_position: position fields
+        """
+        page_dir = self.find_page_dir(page)
+        matched_dirs: list[Path] = []
+
+        for visual_dir in self.visual_dirs(page_dir):
+            vpath = visual_dir / "visual.json"
+            if not vpath.exists():
+                continue
+            vdata = read_json(vpath)
+            vtype = (vdata.get("visual") or {}).get("visualType", "")
+            vname = vdata.get("name", visual_dir.name)
+            pos = vdata.get("position", {})
+
+            if filter_type and vtype != filter_type:
+                continue
+            if filter_name and filter_name.lower() not in vname.lower():
+                continue
+            if filter_bounds:
+                x = float(pos.get("x", 0))
+                y = float(pos.get("y", 0))
+                if filter_bounds.get("x_min") is not None and x < float(filter_bounds["x_min"]):
+                    continue
+                if filter_bounds.get("x_max") is not None and x > float(filter_bounds["x_max"]):
+                    continue
+                if filter_bounds.get("y_min") is not None and y < float(filter_bounds["y_min"]):
+                    continue
+                if filter_bounds.get("y_max") is not None and y > float(filter_bounds["y_max"]):
+                    continue
+            matched_dirs.append(visual_dir)
+
+        matched = len(matched_dirs)
+        affected = 0
+        summary: list[dict[str, Any]] = []
+
+        for visual_dir in matched_dirs:
+            vpath = visual_dir / "visual.json"
+            vdata = read_json(vpath)
+            vname = vdata.get("name", visual_dir.name)
+            vtype = (vdata.get("visual") or {}).get("visualType", "")
+            summary.append({"name": vname, "type": vtype})
+
+            if op == "list":
+                continue
+
+            if op == "delete":
+                shutil.rmtree(visual_dir)
+                affected += 1
+
+            elif op == "hide":
+                vdata["isHidden"] = True
+                write_json(vpath, vdata)
+                affected += 1
+
+            elif op == "show":
+                vdata.pop("isHidden", None)
+                write_json(vpath, vdata)
+                affected += 1
+
+            elif op == "update_title":
+                title_text = (update or {}).get("title", "")
+                escaped_title = title_text.replace("'", "''")
+                vdata.setdefault("visual", {}).setdefault("visualContainerObjects", {})
+                vdata["visual"]["visualContainerObjects"]["title"] = [{
+                    "properties": {
+                        "text": {"expr": {"Literal": {"Value": f"'{escaped_title}'"}}}
+                    }
+                }]
+                write_json(vpath, vdata)
+                affected += 1
+
+            elif op == "update_position":
+                pos = vdata.get("position", {})
+                for k, v in (update or {}).items():
+                    if k in POSITION_KEYS:
+                        pos[k] = float(v)
+                vdata["position"] = pos
+                write_json(vpath, vdata)
+                affected += 1
+
+            else:
+                raise PBIRError(f"Unknown bulk_visual_op op '{op}'. Use: list, delete, hide, show, update_title, update_position.")
+
+        result: dict[str, Any] = {"op": op, "matched": matched, "affected": affected, "visuals": summary}
+        if validate_after:
+            result["validation"] = validation_summary(self.validate().as_dict())
+        return result
+
+    # ── Custom Visuals ─────────────────────────────────────────────────────────
+
+    def list_custom_visuals(self) -> list[dict[str, Any]]:
+        """Return custom visuals registered in report.json resourcePackages."""
+        report = self.load_report_json()
+        result = []
+        for pkg in report.get("resourcePackages", []):
+            for item in pkg.get("items", []):
+                if item.get("type") == "CustomVisual":
+                    result.append({
+                        "name": item.get("name"),
+                        "path": item.get("path"),
+                        "packageName": pkg.get("name"),
+                    })
+        return result
+
+    def import_custom_visual(
+        self,
+        pbiviz_path: str,
+        validate_after: bool = False,
+    ) -> dict[str, Any]:
+        """Import a .pbiviz custom visual file into the report.
+
+        Copies the file to StaticResources/RegisteredResources/ and registers
+        it in report.json under a RegisteredResources resourcePackage.
+        The .pbiviz is a ZIP containing package.json with visual metadata.
+        """
+        import zipfile
+        src = Path(pbiviz_path).expanduser().resolve()
+        if not src.exists():
+            raise PBIRError(f".pbiviz file not found: {src}")
+        if not src.suffix.lower() == ".pbiviz":
+            raise PBIRError(f"Expected a .pbiviz file, got: {src.name}")
+
+        # Extract metadata from package.json inside the ZIP
+        try:
+            with zipfile.ZipFile(src, "r") as zf:
+                pkg_json_names = [n for n in zf.namelist() if n.lower() == "package.json"]
+                if not pkg_json_names:
+                    raise PBIRError("No package.json found inside .pbiviz ZIP.")
+                pkg_data = json.loads(zf.read(pkg_json_names[0]).decode("utf-8"))
+        except zipfile.BadZipFile as e:
+            raise PBIRError(f"Not a valid .pbiviz ZIP: {e}") from e
+
+        visual_meta = pkg_data.get("visual", pkg_data)
+        visual_name = visual_meta.get("name") or src.stem
+        visual_guid = visual_meta.get("guid") or visual_name
+        visual_version = visual_meta.get("version", "")
+
+        # Copy to StaticResources/RegisteredResources/
+        resource_dir = self.report_root / "StaticResources" / "RegisteredResources"
+        resource_dir.mkdir(parents=True, exist_ok=True)
+        dest_name = f"{visual_guid}.pbiviz"
+        dest = resource_dir / dest_name
+        shutil.copy2(src, dest)
+
+        # Register in report.json
+        report = self.load_report_json()
+        packages: list[dict[str, Any]] = report.setdefault("resourcePackages", [])
+
+        # Find or create RegisteredResources package
+        rr_pkg: dict[str, Any] | None = None
+        for pkg in packages:
+            if pkg.get("type") == "RegisteredResources" and pkg.get("name") == "RegisteredResources":
+                rr_pkg = pkg
+                break
+        if rr_pkg is None:
+            rr_pkg = {"name": "RegisteredResources", "type": "RegisteredResources", "items": []}
+            packages.append(rr_pkg)
+
+        items: list[dict[str, Any]] = rr_pkg.setdefault("items", [])
+        # Remove existing entry with same name/guid
+        items[:] = [i for i in items if i.get("name") != visual_guid]
+        items.append({
+            "name": visual_guid,
+            "path": dest_name,
+            "type": "CustomVisual",
+        })
+        write_json(self.report_json_path(), report)
+
+        result: dict[str, Any] = {
+            "action": "imported",
+            "name": visual_name,
+            "guid": visual_guid,
+            "version": visual_version,
+            "path": str(dest),
+        }
+        if validate_after:
+            result["validation"] = validation_summary(self.validate().as_dict())
+        return result
+
+    def remove_custom_visual(
+        self,
+        guid: str,
+        delete_file: bool = True,
+        validate_after: bool = False,
+    ) -> dict[str, Any]:
+        """Remove a custom visual registration from report.json (and optionally delete the file)."""
+        report = self.load_report_json()
+        removed_items: list[str] = []
+        for pkg in report.get("resourcePackages", []):
+            before = len(pkg.get("items", []))
+            pkg["items"] = [i for i in pkg.get("items", []) if i.get("name") != guid]
+            for _ in range(before - len(pkg["items"])):
+                removed_items.append(guid)
+
+        if delete_file:
+            resource_dir = self.report_root / "StaticResources" / "RegisteredResources"
+            for candidate in [resource_dir / f"{guid}.pbiviz"]:
+                if candidate.exists():
+                    candidate.unlink()
+
+        write_json(self.report_json_path(), report)
+        result: dict[str, Any] = {"action": "removed", "guid": guid, "removed_count": len(removed_items)}
         if validate_after:
             result["validation"] = validation_summary(self.validate().as_dict())
         return result
@@ -2317,10 +3656,17 @@ class PBIRReport:
     def upsert_registered_theme_package(report: dict[str, Any], item_name: str, file_name: str) -> None:
         # PBI Desktop does NOT write a RegisteredResources resourcePackages entry for custom themes.
         # It resolves them by name from StaticResources/RegisteredResources/ directly.
-        # Remove any stale RegisteredResources package entries we may have written previously.
+        # Remove stale RegisteredResources package entries that contain only theme JSON files,
+        # but preserve packages that register custom visuals (.pbiviz files).
         packages = report.get("resourcePackages")
         if packages:
-            report["resourcePackages"] = [p for p in packages if p.get("type") != "RegisteredResources"]
+            def _is_theme_only_package(pkg: dict) -> bool:
+                if pkg.get("type") != "RegisteredResources":
+                    return False
+                items = pkg.get("items") or []
+                # Preserve if any item is a .pbiviz (custom visual)
+                return not any(str(item.get("path", "")).lower().endswith(".pbiviz") for item in items)
+            report["resourcePackages"] = [p for p in packages if not _is_theme_only_package(p)]
 
     def generate_theme(
         self,
@@ -2567,7 +3913,13 @@ class PBIRSemanticModel:
 
     @classmethod
     def from_report(cls, report_root: Path) -> "PBIRSemanticModel | None":
-        """Locate the sibling .SemanticModel folder from a .Report folder."""
+        """Locate the referenced or sibling .SemanticModel folder from a .Report folder."""
+        try:
+            referenced = PBIRReport(report_root).semantic_model_path()
+            if referenced and (referenced / "definition" / "model.tmdl").exists():
+                return cls(referenced)
+        except PBIRError:
+            pass
         sm_path = Path(str(report_root).replace(".Report", ".SemanticModel"))
         if sm_path.exists() and (sm_path / "definition" / "model.tmdl").exists():
             return cls(sm_path)
@@ -2584,25 +3936,48 @@ class PBIRSemanticModel:
         text = path.read_text(encoding="utf-8")
         name = model_perm = pbi_id = ""
         table_permissions: list[dict[str, str]] = []
-        for line in text.splitlines():
-            s = line.strip()
+        column_permissions: list[dict[str, str]] = []
+        lines = text.splitlines()
+        i = 0
+        while i < len(lines):
+            s = lines[i].strip()
             if s.startswith("role "):
                 name = s[5:].strip().strip("'")
             elif s.startswith("modelPermission:"):
                 model_perm = s.split(":", 1)[1].strip()
             elif s.startswith("tablePermission "):
                 rest = s[len("tablePermission "):]
-                # rest: 'TableName' = <dax>
                 if "' = " in rest:
                     tbl, dax = rest.split("' = ", 1)
                     table_permissions.append({"table": tbl.strip().strip("'"), "dax": dax.strip()})
                 elif '" = ' in rest:
                     tbl, dax = rest.split('" = ', 1)
                     table_permissions.append({"table": tbl.strip().strip('"'), "dax": dax.strip()})
+                else:
+                    # OLS table permission — check next line for metadataPermission
+                    tbl = rest.strip().strip("'\"")
+                    perm_val = "None"
+                    if i + 1 < len(lines) and "metadataPermission:" in lines[i + 1]:
+                        perm_val = lines[i + 1].strip().split(":", 1)[1].strip()
+                        i += 1
+                    table_permissions.append({"table": tbl, "permission": perm_val})
+            elif s.startswith("columnPermission "):
+                rest = s[len("columnPermission "):]
+                perm_val = "None"
+                if i + 1 < len(lines) and "metadataPermission:" in lines[i + 1]:
+                    perm_val = lines[i + 1].strip().split(":", 1)[1].strip()
+                    i += 1
+                # rest: 'Table'[Column] or Table[Column]
+                import re as _re
+                m = _re.match(r"['\"]?(.+?)['\"]?\[(.+?)\]", rest)
+                if m:
+                    column_permissions.append({"table": m.group(1), "column": m.group(2), "permission": perm_val})
             elif s.startswith("annotation PBI_Id"):
                 pbi_id = s.split("=", 1)[1].strip()
+            i += 1
         return {"name": name, "modelPermission": model_perm or "read",
-                "tablePermissions": table_permissions, "_pbi_id": pbi_id}
+                "tablePermissions": table_permissions, "columnPermissions": column_permissions,
+                "_pbi_id": pbi_id}
 
     def _write_role_file(
         self,
@@ -2610,6 +3985,7 @@ class PBIRSemanticModel:
         table_permissions: list[dict[str, str]],
         model_permission: str = "read",
         pbi_id: str | None = None,
+        column_permissions: list[dict[str, str]] | None = None,
     ) -> Path:
         self.roles_dir.mkdir(parents=True, exist_ok=True)
         if not pbi_id:
@@ -2620,8 +3996,19 @@ class PBIRSemanticModel:
             "",
         ]
         for tp in table_permissions:
-            lines.append(f"\ttablePermission {self._tmdl_name(tp['table'])} = {tp['dax']}")
-        lines += ["", f"\tannotation PBI_Id = {pbi_id}", ""]
+            if tp.get("dax"):
+                lines.append(f"\ttablePermission {self._tmdl_name(tp['table'])} = {tp['dax']}")
+            else:
+                perm = tp.get("permission", "None")
+                lines.append(f"\ttablePermission {self._tmdl_name(tp['table'])}")
+                lines.append(f"\t\tmetadataPermission: {perm}")
+                lines.append("")
+        for cp in (column_permissions or []):
+            perm = cp.get("permission", "None")
+            lines.append(f"\tcolumnPermission {self._tmdl_name(cp['table'])}[{cp['column']}]")
+            lines.append(f"\t\tmetadataPermission: {perm}")
+            lines.append("")
+        lines += [f"\tannotation PBI_Id = {pbi_id}", ""]
         path = self.roles_dir / f"{name}.tmdl"
         path.write_text("\n".join(lines), encoding="utf-8")
         return path
@@ -2653,6 +4040,7 @@ class PBIRSemanticModel:
         name: str,
         table_permissions: list[dict[str, str]] | None = None,
         model_permission: str = "read",
+        column_permissions: list[dict[str, str]] | None = None,
     ) -> dict[str, Any]:
         """action: create | update | delete"""
         if action == "delete":
@@ -2664,20 +4052,26 @@ class PBIRSemanticModel:
             return {"action": "deleted", "name": name}
 
         if action in ("create", "update"):
-            if not table_permissions:
-                raise PBIRError("table_permissions is required for create/update.")
-            # Preserve existing PBI_Id on update
+            if not table_permissions and not column_permissions:
+                raise PBIRError("table_permissions or column_permissions is required for create/update.")
+            # Preserve existing PBI_Id on update; reject create if already exists
             pbi_id: str | None = None
             existing = self.roles_dir / f"{name}.tmdl"
+            if action == "create" and existing.exists():
+                raise PBIRError(f"Role '{name}' already exists. Use action='update' to modify it.")
             if action == "update" and existing.exists():
                 pbi_id = self._parse_role_file(existing).get("_pbi_id")
-            path = self._write_role_file(name, table_permissions, model_permission, pbi_id=pbi_id)
+            path = self._write_role_file(
+                name, table_permissions or [], model_permission,
+                pbi_id=pbi_id, column_permissions=column_permissions,
+            )
             self._update_model_ref(name, add=True)
             return {
                 "action": action + "d",
                 "name": name,
                 "modelPermission": model_permission,
-                "tablePermissions": table_permissions,
+                "tablePermissions": table_permissions or [],
+                "columnPermissions": column_permissions or [],
                 "path": str(path),
             }
 
@@ -2703,18 +4097,22 @@ class PBIRSemanticModel:
         overwritten: list[str] = []
         for value in values:
             role_name = f"{role_prefix}{value}" if role_prefix else value
-            perms = [{"table": table, "dax": f'[{column}] = "{value}"'}]
+            safe_name = re.sub(r'[\\/:*?"<>|]', '_', role_name)
+            escaped_value = value.replace('"', '""')
+            perms = [{"table": table, "dax": f'[{column}] = "{escaped_value}"'}]
             if additional_tables:
                 perms.extend(additional_tables)
-            existing = self.roles_dir / f"{role_name}.tmdl" if self.roles_dir.exists() else None
+            existing = self.roles_dir / f"{safe_name}.tmdl" if self.roles_dir.exists() else None
             if existing and existing.exists():
                 if on_conflict == "skip":
                     skipped.append(role_name)
                     continue
-                self.manage_role("update", role_name, perms)
+                self._write_role_file(safe_name, perms, pbi_id=self._parse_role_file(existing).get("_pbi_id"))
+                self._update_model_ref(safe_name, add=True)
                 overwritten.append(role_name)
             else:
-                self.manage_role("create", role_name, perms)
+                self._write_role_file(safe_name, perms)
+                self._update_model_ref(safe_name, add=True)
                 created.append(role_name)
         return {
             "created": created,
@@ -3000,6 +4398,449 @@ class PBIRSemanticModel:
             results.append(entry)
         return results
 
+    # ── TMDL write helpers ────────────────────────────────────────────────────
+
+    def _find_table_file(self, table: str) -> Path:
+        candidates = [
+            self.sm_root / "definition" / "tables" / f"{table}.tmdl",
+            self.sm_root / "definition" / "tables" / f"'{table}'.tmdl",
+        ]
+        path = next((p for p in candidates if p.exists()), None)
+        if path is None:
+            td = self.sm_root / "definition" / "tables"
+            available = [p.stem.strip("'") for p in td.glob("*.tmdl")] if td.exists() else []
+            raise PBIRError(f"Table '{table}' not found. Available: {', '.join(available)}")
+        return path
+
+    @staticmethod
+    def _measure_block(name: str, dax: str, format_string: str | None = None,
+                       display_folder: str | None = None, description: str | None = None) -> str:
+        """Build a single TMDL measure block (tab-indented, no trailing newline)."""
+        tname = f"'{name}'" if " " in name else name
+        if "\n" in dax:
+            first_line = f"\tmeasure {tname} = ```"
+            dax_lines = "\n".join(f"\t\t{ln}" for ln in dax.splitlines())
+            body = f"{first_line}\n{dax_lines}\n\t\t```"
+        else:
+            body = f"\tmeasure {tname} = {dax}"
+        if format_string:
+            body += f'\n\t\tformatString: "{format_string}"'
+        if display_folder:
+            body += f'\n\t\tdisplayFolder: "{display_folder}"'
+        if description:
+            body += f'\n\t\tdescription: "{description}"'
+        return body
+
+    def manage_measure(
+        self,
+        action: str,
+        table: str,
+        name: str,
+        dax: str | None = None,
+        format_string: str | None = None,
+        display_folder: str | None = None,
+        description: str | None = None,
+    ) -> dict[str, Any]:
+        """action: create | update | delete | list"""
+        if action == "list":
+            path = self._find_table_file(table)
+            text = path.read_text(encoding="utf-8")
+            measures = []
+            for line in text.splitlines():
+                s = line.strip()
+                if s.startswith("measure "):
+                    rest = s[8:].strip()
+                    if "=" in rest:
+                        mname, _, mexpr = rest.partition("=")
+                        measures.append({"name": self._tmdl_unquote(mname.strip()), "dax": mexpr.strip()})
+                    else:
+                        measures.append({"name": self._tmdl_unquote(rest), "dax": None})
+            return {"table": table, "measures": measures}
+
+        if action in ("create", "update"):
+            if not dax:
+                raise PBIRError(f"dax is required for action='{action}'.")
+            block = self._measure_block(name, dax, format_string, display_folder, description)
+            path = self._find_table_file(table)
+            text = path.read_text(encoding="utf-8")
+            tname = f"'{name}'" if " " in name else name
+            # Check if measure already exists
+            pattern = re.compile(r'(^|\n)\t' + r'measure\s+' + re.escape(tname) + r'\s*[=\n]', re.MULTILINE)
+            if action == "create" and pattern.search(text):
+                raise PBIRError(f"Measure '{name}' already exists in table '{table}'. Use action='update' to replace.")
+            if action == "update":
+                if not pattern.search(text):
+                    raise PBIRError(f"Measure '{name}' not found in table '{table}'. Use action='create' to add it.")
+                # Find start/end of the measure block (tab-level 1)
+                lines = text.splitlines(keepends=True)
+                start = end = None
+                in_block = False
+                for i, raw in enumerate(lines):
+                    stripped = raw.strip()
+                    if not in_block and stripped.startswith(f"measure {tname}"):
+                        start = i
+                        in_block = True
+                        continue
+                    if in_block:
+                        if raw.startswith("\t\t") or not raw.strip():
+                            end = i
+                        else:
+                            break
+                if start is not None:
+                    end_idx = (end + 1) if end is not None else (start + 1)
+                    new_lines = lines[:start] + [block + "\n"] + lines[end_idx:]
+                    path.write_text("".join(new_lines), encoding="utf-8")
+                return {"action": "updated", "table": table, "name": name, "path": str(path)}
+            # create: append before annotation or at end
+            ann_idx = text.find("\n\tannotation ")
+            if ann_idx != -1:
+                new_text = text[:ann_idx] + "\n" + block + text[ann_idx:]
+            else:
+                new_text = text.rstrip("\n") + "\n\n" + block + "\n"
+            path.write_text(new_text, encoding="utf-8")
+            return {"action": "created", "table": table, "name": name, "path": str(path)}
+
+        if action == "delete":
+            path = self._find_table_file(table)
+            text = path.read_text(encoding="utf-8")
+            tname = f"'{name}'" if " " in name else name
+            lines = text.splitlines(keepends=True)
+            start = end = None
+            for i, raw in enumerate(lines):
+                stripped = raw.strip()
+                if start is None and stripped.startswith(f"measure {tname}"):
+                    start = i
+                    continue
+                if start is not None:
+                    if raw.startswith("\t\t") or not raw.strip():
+                        end = i
+                    else:
+                        break
+            if start is None:
+                raise PBIRError(f"Measure '{name}' not found in table '{table}'.")
+            end_idx = (end + 1) if end is not None else (start + 1)
+            # also remove blank line before
+            if start > 0 and not lines[start - 1].strip():
+                start -= 1
+            new_lines = lines[:start] + lines[end_idx:]
+            path.write_text("".join(new_lines), encoding="utf-8")
+            return {"action": "deleted", "table": table, "name": name, "path": str(path)}
+
+        raise PBIRError(f"Unknown action '{action}'. Use create, update, delete, or list.")
+
+    MEASURE_TEMPLATES: dict[str, dict[str, str]] = {
+        "total": {"dax": "SUM('{source_table}'[{column}])", "format_string": "#,##0"},
+        "average": {"dax": "AVERAGE('{source_table}'[{column}])", "format_string": "#,##0.00"},
+        "distinct_count": {"dax": "DISTINCTCOUNT('{source_table}'[{column}])", "format_string": "#,##0"},
+        "count_rows": {"dax": "COUNTROWS('{source_table}')", "format_string": "#,##0"},
+        "yoy_growth": {
+            "dax": "{base_measure} - CALCULATE({base_measure}, SAMEPERIODLASTYEAR('{date_table}'[{date_column}]))",
+            "format_string": "#,##0",
+        },
+        "yoy_pct": {
+            "dax": "DIVIDE({base_measure} - CALCULATE({base_measure}, SAMEPERIODLASTYEAR('{date_table}'[{date_column}])), CALCULATE({base_measure}, SAMEPERIODLASTYEAR('{date_table}'[{date_column}])))",
+            "format_string": "0.00%",
+        },
+        "rolling_12_months": {
+            "dax": "CALCULATE({base_measure}, DATESINPERIOD('{date_table}'[{date_column}], MAX('{date_table}'[{date_column}]), -12, MONTH))",
+            "format_string": "#,##0",
+        },
+    }
+
+    def add_measure_from_template(
+        self,
+        template: str,
+        table: str,
+        name: str,
+        params: dict[str, Any] | None = None,
+        action: str = "create",
+    ) -> dict[str, Any]:
+        if template not in self.MEASURE_TEMPLATES:
+            raise PBIRError(f"Unknown measure template '{template}'. Available: {', '.join(sorted(self.MEASURE_TEMPLATES))}")
+        p = dict(params or {})
+        p.setdefault("source_table", table)
+        try:
+            dax = self.MEASURE_TEMPLATES[template]["dax"].format(**p)
+        except KeyError as exc:
+            raise PBIRError(f"Template '{template}' requires parameter: {exc.args[0]}") from exc
+        return self.manage_measure(
+            action=action,
+            table=table,
+            name=name,
+            dax=dax,
+            format_string=p.get("format_string", self.MEASURE_TEMPLATES[template].get("format_string")),
+            display_folder=p.get("display_folder"),
+            description=p.get("description", f"Generated from template '{template}'."),
+        )
+
+    # ── Perspectives ──────────────────────────────────────────────────────────
+
+    @property
+    def perspectives_dir(self) -> Path:
+        return self.sm_root / "definition" / "perspectives"
+
+    def list_perspectives(self) -> list[dict[str, Any]]:
+        if not self.perspectives_dir.exists():
+            return []
+        result = []
+        for path in sorted(self.perspectives_dir.glob("*.tmdl")):
+            result.append(self._parse_perspective_file(path))
+        return result
+
+    def _parse_perspective_file(self, path: Path) -> dict[str, Any]:
+        text = path.read_text(encoding="utf-8")
+        name = path.stem.strip("'")
+        tables: list[dict[str, Any]] = []
+        cur_table: dict[str, Any] | None = None
+        for line in text.splitlines():
+            s = line.strip()
+            if s.startswith("perspective "):
+                name = self._tmdl_unquote(s[12:].strip())
+            elif s.startswith("perspectiveTable "):
+                cur_table = {"table": self._tmdl_unquote(s[17:].strip()), "measures": [], "columns": []}
+                tables.append(cur_table)
+            elif cur_table and s.startswith("perspectiveMeasure "):
+                cur_table["measures"].append(self._tmdl_unquote(s[19:].strip()))
+            elif cur_table and s.startswith("perspectiveColumn "):
+                cur_table["columns"].append(self._tmdl_unquote(s[18:].strip()))
+        return {"name": name, "tables": tables}
+
+    def manage_perspective(
+        self,
+        action: str,
+        name: str,
+        tables: list[dict[str, Any]] | None = None,
+    ) -> dict[str, Any]:
+        """action: create | update | delete"""
+        safe_name = name.replace("/", "_").replace("\\", "_")
+        path = self.perspectives_dir / f"{safe_name}.tmdl"
+        if action == "delete":
+            if not path.exists():
+                raise PBIRError(f"Perspective '{name}' not found.")
+            path.unlink()
+            return {"action": "deleted", "name": name}
+        if action in ("create", "update"):
+            if action == "create" and path.exists():
+                raise PBIRError(f"Perspective '{name}' already exists. Use action='update' to replace.")
+            if action == "update" and not path.exists():
+                raise PBIRError(f"Perspective '{name}' not found. Use action='create' to add it.")
+            self.perspectives_dir.mkdir(parents=True, exist_ok=True)
+            pname = self._tmdl_name(name)
+            lines = [f"perspective {pname}", ""]
+            for tbl in (tables or []):
+                tname = self._tmdl_name(tbl["table"])
+                lines.append(f"\tperspectiveTable {tname}")
+                for m in tbl.get("measures") or []:
+                    lines.append(f"\t\tperspectiveMeasure {self._tmdl_name(m)}")
+                for c in tbl.get("columns") or []:
+                    lines.append(f"\t\tperspectiveColumn {self._tmdl_name(c)}")
+                lines.append("")
+            path.write_text("\n".join(lines), encoding="utf-8")
+            return {"action": action + "d", "name": name, "path": str(path)}
+        raise PBIRError(f"Unknown action '{action}'. Use create, update, or delete.")
+
+    # ── TMDL diff ─────────────────────────────────────────────────────────────
+
+    def tmdl_diff(self, other_path: str) -> dict[str, Any]:
+        """Compare this SemanticModel's definition/ folder against another path."""
+        import difflib
+        self_def = self.sm_root / "definition"
+        other_def = Path(other_path)
+        if not other_def.exists():
+            raise PBIRError(f"other_path does not exist: {other_path}")
+        # If other_path is a .SemanticModel or SM root, drill into definition/
+        if (other_def / "definition").exists():
+            other_def = other_def / "definition"
+
+        def collect(base: Path) -> dict[str, str]:
+            out: dict[str, str] = {}
+            if not base.exists():
+                return out
+            for f in base.rglob("*.tmdl"):
+                rel = str(f.relative_to(base))
+                text = f.read_text(encoding="utf-8-sig")
+                # Strip lineageTag lines (noise)
+                cleaned = "\n".join(
+                    ln for ln in text.splitlines()
+                    if not ln.strip().startswith("lineageTag:")
+                )
+                out[rel] = cleaned
+            return out
+
+        self_files = collect(self_def)
+        other_files = collect(other_def)
+        self_keys = set(self_files)
+        other_keys = set(other_files)
+
+        added = sorted(self_keys - other_keys)
+        removed = sorted(other_keys - self_keys)
+        changed = []
+        unchanged = 0
+        for key in sorted(self_keys & other_keys):
+            if self_files[key] == other_files[key]:
+                unchanged += 1
+            else:
+                diff = difflib.unified_diff(
+                    other_files[key].splitlines(),
+                    self_files[key].splitlines(),
+                    fromfile=f"other/{key}",
+                    tofile=f"self/{key}",
+                    n=3,
+                    lineterm="",
+                )
+                changed.append({"file": key, "diff": "\n".join(list(diff)[:120])})
+        return {
+            "added": added,
+            "removed": removed,
+            "changed": changed,
+            "unchanged_count": unchanged,
+        }
+
+    # ── Relationships ─────────────────────────────────────────────────────────
+
+    @property
+    def relationships_tmdl(self) -> Path:
+        return self.sm_root / "definition" / "relationships.tmdl"
+
+    def manage_relationship(
+        self,
+        action: str,
+        from_table: str,
+        from_column: str,
+        to_table: str,
+        to_column: str,
+        cardinality: str | None = None,
+        cross_filter: str | None = None,
+        active: bool = True,
+    ) -> dict[str, Any]:
+        """action: create | delete"""
+        ft = self._tmdl_name(from_table)
+        fc = self._tmdl_name(from_column)
+        tt = self._tmdl_name(to_table)
+        tc = self._tmdl_name(to_column)
+
+        def _rel_key(block: str) -> tuple[str, str, str, str] | None:
+            fm = re.search(r"fromColumn:\s+(.+?)\.(.+)", block)
+            tm = re.search(r"toColumn:\s+(.+?)\.(.+)", block)
+            if not fm or not tm:
+                return None
+            return (fm.group(1).strip().strip("'"), fm.group(2).strip().strip("'"),
+                    tm.group(1).strip().strip("'"), tm.group(2).strip().strip("'"))
+
+        if action == "delete":
+            if not self.relationships_tmdl.exists():
+                raise PBIRError("No relationships.tmdl found.")
+            text = self.relationships_tmdl.read_text(encoding="utf-8")
+            blocks = re.split(r"(?m)^relationship\b", text)
+            header = blocks[0]
+            kept = []
+            deleted = False
+            for b in blocks[1:]:
+                key = _rel_key(b)
+                if key and key == (from_table, from_column, to_table, to_column):
+                    deleted = True
+                else:
+                    kept.append(b)
+            if not deleted:
+                raise PBIRError(f"Relationship {from_table}.{from_column} -> {to_table}.{to_column} not found.")
+            new_text = header + "".join("relationship" + b for b in kept)
+            self.relationships_tmdl.write_text(new_text, encoding="utf-8")
+            return {"action": "deleted", "from": f"{from_table}.{from_column}", "to": f"{to_table}.{to_column}"}
+
+        if action == "create":
+            lines = ["relationship"]
+            lines.append(f"\tfromColumn: {ft}.{fc}")
+            lines.append(f"\ttoColumn: {tt}.{tc}")
+            if cardinality:
+                lines.append(f"\tcardinality: {cardinality}")
+            if cross_filter:
+                lines.append(f"\tcrossFilteringBehavior: {cross_filter}")
+            if not active:
+                lines.append("\tisActive: false")
+            block = "\n".join(lines) + "\n"
+            if self.relationships_tmdl.exists():
+                existing = self.relationships_tmdl.read_text(encoding="utf-8")
+                new_text = existing.rstrip("\n") + "\n\n" + block
+            else:
+                new_text = block
+            self.relationships_tmdl.write_text(new_text, encoding="utf-8")
+            return {"action": "created", "from": f"{from_table}.{from_column}", "to": f"{to_table}.{to_column}"}
+
+        raise PBIRError(f"Unknown action '{action}'. Use create or delete.")
+
+    # ── Hierarchies ───────────────────────────────────────────────────────────
+
+    def manage_hierarchy(
+        self,
+        action: str,
+        table: str,
+        name: str,
+        levels: list[dict[str, str]] | None = None,
+    ) -> dict[str, Any]:
+        """action: create | delete | list"""
+        path = self._find_table_file(table)
+        text = path.read_text(encoding="utf-8")
+        hname = self._tmdl_name(name)
+
+        if action == "list":
+            hierarchies: list[dict[str, Any]] = []
+            cur: dict[str, Any] | None = None
+            for line in text.splitlines():
+                s = line.strip()
+                ind = len(line) - len(line.lstrip("\t"))
+                if ind == 1 and s.startswith("hierarchy "):
+                    cur = {"name": self._tmdl_unquote(s[10:].strip()), "levels": []}
+                    hierarchies.append(cur)
+                elif cur and ind == 2 and s.startswith("level "):
+                    lvl_name = self._tmdl_unquote(s[6:].strip())
+                    cur["levels"].append({"name": lvl_name})
+                elif cur and ind == 3 and s.startswith("column:"):
+                    cur["levels"][-1]["column"] = s[7:].strip().strip("'")
+            return {"table": table, "hierarchies": hierarchies}
+
+        if action == "delete":
+            lines = text.splitlines(keepends=True)
+            start = end = None
+            for i, raw in enumerate(lines):
+                s = raw.strip()
+                ind = len(raw) - len(raw.lstrip("\t"))
+                if start is None and ind == 1 and s.startswith(f"hierarchy {hname}"):
+                    start = i
+                    continue
+                if start is not None:
+                    if raw.startswith("\t\t") or not raw.strip():
+                        end = i
+                    else:
+                        break
+            if start is None:
+                raise PBIRError(f"Hierarchy '{name}' not found in table '{table}'.")
+            end_idx = (end + 1) if end is not None else (start + 1)
+            if start > 0 and not lines[start - 1].strip():
+                start -= 1
+            path.write_text("".join(lines[:start] + lines[end_idx:]), encoding="utf-8")
+            return {"action": "deleted", "table": table, "name": name}
+
+        if action == "create":
+            if not levels:
+                raise PBIRError("levels is required for action='create'.")
+            block_lines = [f"\thierarchy {hname}", ""]
+            for lvl in levels:
+                lname = self._tmdl_name(lvl["name"])
+                lcol = self._tmdl_name(lvl["column"])
+                block_lines.append(f"\t\tlevel {lname}")
+                block_lines.append(f"\t\t\tcolumn: {lcol}")
+                block_lines.append("")
+            block = "\n".join(block_lines)
+            ann_idx = text.find("\n\tannotation ")
+            if ann_idx != -1:
+                new_text = text[:ann_idx] + "\n" + block + text[ann_idx:]
+            else:
+                new_text = text.rstrip("\n") + "\n\n" + block + "\n"
+            path.write_text(new_text, encoding="utf-8")
+            return {"action": "created", "table": table, "name": name}
+
+        raise PBIRError(f"Unknown action '{action}'. Use create, delete, or list.")
+
 
 CUSTOM_TOOLS_DIR = Path(__file__).parent / "custom_tools"
 
@@ -3007,8 +4848,10 @@ CUSTOM_TOOLS_DIR = Path(__file__).parent / "custom_tools"
 class PBIRMCPServer:
     def __init__(self) -> None:
         self.current_report: PBIRReport | None = None
+        self.progress_callback: Callable[[dict[str, Any]], None] | None = None
         self.tools: dict[str, tuple[str, dict[str, Any], Callable[[dict[str, Any]], Any]]] = {}
         self.register_tools()
+        self._relax_project_path_requirements()
         self._load_custom_tools()
 
     def report(self, args: dict[str, Any]) -> PBIRReport:
@@ -3022,16 +4865,33 @@ class PBIRMCPServer:
 
     def semantic_model(self, args: dict[str, Any]) -> PBIRSemanticModel:
         report = self.report(args)
-        sm = PBIRSemanticModel.from_report(report.report_root)
+        sm_path = report.semantic_model_path()
+        sm = PBIRSemanticModel(sm_path) if sm_path and (sm_path / "definition" / "model.tmdl").exists() else None
+        if sm is None:
+            sm = PBIRSemanticModel.from_report(report.report_root)
         if sm is None:
             raise PBIRError(
                 f"No SemanticModel found next to {report.report_root}. "
-                "Expected a sibling folder with the same base name ending in .SemanticModel."
+                "Expected definition.pbir to reference a SemanticModel folder, or a sibling folder with the same base name ending in .SemanticModel."
             )
         return sm
 
     def add_tool(self, name: str, description: str, input_schema: dict[str, Any], fn: Callable[[dict[str, Any]], Any]) -> None:
         self.tools[name] = (description, input_schema, fn)
+
+    def emit_progress(self, event: dict[str, Any]) -> None:
+        if self.progress_callback is None:
+            return
+        try:
+            self.progress_callback(event)
+        except Exception:
+            pass
+
+    def _relax_project_path_requirements(self) -> None:
+        for description, input_schema, fn in self.tools.values():
+            required = input_schema.get("required")
+            if isinstance(required, list) and "project_path" in required:
+                input_schema["required"] = [item for item in required if item != "project_path"]
 
     def register_tools(self) -> None:
         self.add_tool(
@@ -3081,7 +4941,7 @@ class PBIRMCPServer:
                     "bad": {"type": "string", "description": "Semantic bad/negative color (default #D64550)."},
                     "validate_after": {"type": "boolean"},
                 },
-                "required": ["primary"],
+                "required": ["project_path", "primary"],
                 "additionalProperties": False,
             },
             self.tool_generate_theme,
@@ -3120,7 +4980,7 @@ class PBIRMCPServer:
                     },
                     "validate_after": {"type": "boolean", "default": True},
                 },
-                "required": ["targets"],
+                "required": ["project_path", "targets"],
                 "additionalProperties": False,
             },
             lambda args: self.report(args).recolor_visuals(
@@ -3151,7 +5011,7 @@ class PBIRMCPServer:
                     },
                     "validate_after": {"type": "boolean", "default": False},
                 },
-                "required": ["page", "color"],
+                "required": ["project_path", "page", "color"],
                 "additionalProperties": False,
             },
             lambda args: self.report(args).set_page_background(
@@ -3171,20 +5031,22 @@ class PBIRMCPServer:
             {
                 "type": "object",
                 "properties": {"project_path": {"type": "string"}},
-                "additionalProperties": False,
+                                "required": ["project_path"],
+"additionalProperties": False,
             },
             lambda args: {"roles": self.semantic_model(args).list_roles()},
         )
         self.add_tool(
             "manage_rls_role",
             (
-                "Create, update, or delete a Row-Level Security role in the SemanticModel. "
+                "Create, update, or delete a Row-Level Security (RLS) or Object-Level Security (OLS) role. "
                 "action=create: writes a new role TMDL file and registers it in model.tmdl. "
                 "action=update: overwrites an existing role (preserves its PBI_Id). "
                 "action=delete: removes the role file and its model.tmdl reference. "
-                "table_permissions is a list of {table, dax} objects where dax is the DAX filter "
-                "expression (e.g. '[ClientName] = \"Acme\"' or '[Region] IN {\"West\", \"East\"}'). "
-                "Multiple entries restrict different tables within the same role. "
+                "table_permissions: list of {table, dax} for RLS row filters "
+                "(e.g. '[ClientName] = \"Acme\"'). For OLS table-level hide, omit dax and add permission='None'. "
+                "column_permissions: OLS column-level hide — {table, column, permission: 'None'|'Read'} — "
+                "hides specific columns from this role (metadataPermission in TMDL). "
                 "After saving, use 'View as' in PBI Desktop to test the role."
             ),
             {
@@ -3203,20 +5065,34 @@ class PBIRMCPServer:
                             "type": "object",
                             "properties": {
                                 "table": {"type": "string", "description": "Exact table name."},
-                                "dax": {"type": "string", "description": "DAX filter expression."},
+                                "dax": {"type": "string", "description": "DAX row filter expression. Omit for OLS table hide."},
+                                "permission": {"type": "string", "enum": ["None", "Read"], "description": "OLS table permission when dax is omitted."},
                             },
-                            "required": ["table", "dax"],
+                            "required": ["table"],
                         },
-                        "description": "Required for create/update. Omit for delete.",
+                        "description": "RLS row filters or OLS table-level hides. For delete, omit entirely.",
+                    },
+                    "column_permissions": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "table": {"type": "string"},
+                                "column": {"type": "string"},
+                                "permission": {"type": "string", "enum": ["None", "Read"], "default": "None"},
+                            },
+                            "required": ["table", "column"],
+                        },
+                        "description": "OLS column-level permissions. permission='None' hides the column from this role entirely.",
                     },
                     "model_permission": {
                         "type": "string",
                         "enum": ["read", "readRefresh", "readWrite", "admin", "none"],
                         "default": "read",
-                        "description": "Permission level. RLS roles are almost always 'read'.",
+                        "description": "Permission level. RLS/OLS roles are almost always 'read'.",
                     },
                 },
-                "required": ["action", "name"],
+                "required": ["project_path", "action", "name"],
                 "additionalProperties": False,
             },
             lambda args: self.semantic_model(args).manage_role(
@@ -3224,6 +5100,7 @@ class PBIRMCPServer:
                 name=args["name"],
                 table_permissions=args.get("table_permissions"),
                 model_permission=args.get("model_permission", "read"),
+                column_permissions=args.get("column_permissions"),
             ),
         )
         self.add_tool(
@@ -3266,7 +5143,7 @@ class PBIRMCPServer:
                                 "table": {"type": "string"},
                                 "dax": {"type": "string"},
                             },
-                            "required": ["table", "dax"],
+                            "required": ["project_path", "table", "dax"],
                         },
                         "description": "Extra static table filters applied to every role (e.g. restrict a second table).",
                     },
@@ -3277,7 +5154,7 @@ class PBIRMCPServer:
                         "description": "What to do if a role with that name already exists.",
                     },
                 },
-                "required": ["table", "column", "values"],
+                "required": ["project_path", "table", "column", "values"],
                 "additionalProperties": False,
             },
             lambda args: self.semantic_model(args).bulk_create_rls_roles(
@@ -3305,7 +5182,7 @@ class PBIRMCPServer:
                     "project_path": {"type": "string"},
                     "table": {"type": "string", "description": "Semantic model table name (e.g. 'Suspend Comments')."},
                 },
-                "required": ["table"],
+                "required": ["project_path", "table"],
                 "additionalProperties": False,
             },
             lambda args: self.semantic_model(args).get_table_source(args["table"]),
@@ -3367,7 +5244,7 @@ class PBIRMCPServer:
                     "column": {"type": "string", "description": "Column to get distinct values for (e.g. 'BillingSP')."},
                     "max_rows": {"type": "integer", "default": 1000},
                 },
-                "required": ["table", "column"],
+                "required": ["project_path", "table", "column"],
                 "additionalProperties": False,
             },
             lambda args: self.semantic_model(args).get_distinct_values(
@@ -3397,7 +5274,8 @@ class PBIRMCPServer:
                         "description": "Delete all roles whose name starts with this prefix.",
                     },
                 },
-                "additionalProperties": False,
+                                "required": ["project_path"],
+"additionalProperties": False,
             },
             lambda args: self.semantic_model(args).bulk_delete_rls_roles(
                 names=args.get("names"),
@@ -3421,7 +5299,8 @@ class PBIRMCPServer:
                         "description": "Include auto-generated date/template tables.",
                     },
                 },
-                "additionalProperties": False,
+                                "required": ["project_path"],
+"additionalProperties": False,
             },
             lambda args: {"tables": self.semantic_model(args).list_tables(bool(args.get("include_system", False)))},
         )
@@ -3458,7 +5337,7 @@ class PBIRMCPServer:
                         "description": "Report changes without writing files.",
                     },
                 },
-                "required": ["tables", "mode"],
+                "required": ["project_path", "tables", "mode"],
                 "additionalProperties": False,
             },
             lambda args: self.semantic_model(args).set_storage_mode(
@@ -3480,13 +5359,196 @@ class PBIRMCPServer:
                     "project_path": {"type": "string"},
                     "include_date_tables": {"type": "boolean", "default": False},
                 },
-                "additionalProperties": False,
+                                "required": ["project_path"],
+"additionalProperties": False,
             },
             lambda args: {
                 "relationships": self.semantic_model(args).get_relationships(
                     bool(args.get("include_date_tables", False))
                 )
             },
+        )
+        self.add_tool(
+            "manage_measure",
+            (
+                "Create, update, delete, or list DAX measures in a SemanticModel table. "
+                "action='create': add a new measure; dax is required. "
+                "action='update': replace an existing measure's DAX and metadata. "
+                "action='delete': remove a measure by name. "
+                "action='list': return all measures in the table. "
+                "Multiline DAX is supported. Also available as op='manage_measure' in pbir_apply_plan."
+            ),
+            {
+                "type": "object",
+                "properties": {
+                    "project_path": {"type": "string"},
+                    "action": {"type": "string", "enum": ["create", "update", "delete", "list"]},
+                    "table": {"type": "string", "description": "Exact table name."},
+                    "name": {"type": "string", "description": "Measure name."},
+                    "dax": {"type": "string", "description": "DAX expression. Required for create/update."},
+                    "format_string": {"type": "string", "description": "Format string (e.g. '#,##0.00', '$#,##0')."},
+                    "display_folder": {"type": "string", "description": "Display folder name."},
+                    "description": {"type": "string", "description": "Measure description."},
+                },
+                "required": ["project_path", "action", "table"],
+                "additionalProperties": False,
+            },
+            lambda args: self.semantic_model(args).manage_measure(
+                action=args["action"],
+                table=args["table"],
+                name=args.get("name"),
+                dax=args.get("dax"),
+                format_string=args.get("format_string"),
+                display_folder=args.get("display_folder"),
+                description=args.get("description"),
+            ),
+        )
+        self.add_tool(
+            "list_perspectives",
+            "List all perspectives defined in the SemanticModel.",
+            {
+                "type": "object",
+                "properties": {"project_path": {"type": "string"}},
+                                "required": ["project_path"],
+"additionalProperties": False,
+            },
+            lambda args: {"perspectives": self.semantic_model(args).list_perspectives()},
+        )
+        self.add_tool(
+            "manage_perspective",
+            (
+                "Create, update, or delete a SemanticModel perspective. "
+                "Perspectives define a named subset of tables, columns, and measures visible to report authors. "
+                "action='create': write a new perspective TMDL file. "
+                "action='update': replace an existing perspective. "
+                "action='delete': remove the perspective. "
+                "tables: [{table, measures: [...], columns: [...]}]. "
+                "Also available as op='manage_perspective' in pbir_apply_plan."
+            ),
+            {
+                "type": "object",
+                "properties": {
+                    "project_path": {"type": "string"},
+                    "action": {"type": "string", "enum": ["create", "update", "delete"]},
+                    "name": {"type": "string", "description": "Perspective name."},
+                    "tables": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "table": {"type": "string"},
+                                "measures": {"type": "array", "items": {"type": "string"}},
+                                "columns": {"type": "array", "items": {"type": "string"}},
+                            },
+                            "required": ["table"],
+                        },
+                        "description": "Tables (with measures/columns) to include. Required for create/update.",
+                    },
+                },
+                "required": ["project_path", "action", "name"],
+                "additionalProperties": False,
+            },
+            lambda args: self.semantic_model(args).manage_perspective(
+                action=args["action"],
+                name=args["name"],
+                tables=args.get("tables"),
+            ),
+        )
+        self.add_tool(
+            "tmdl_diff",
+            (
+                "Compare this SemanticModel's TMDL definition folder against another SemanticModel path. "
+                "Reports added files (in self, not in other), removed files, and changed files with unified diffs. "
+                "Ignores lineageTag lines (they change on every Desktop save and are noise). "
+                "Useful for reviewing what changed between two versions of a model."
+            ),
+            {
+                "type": "object",
+                "properties": {
+                    "project_path": {"type": "string"},
+                    "other_path": {"type": "string", "description": "Path to the other SemanticModel root or definition/ folder to compare against."},
+                },
+                "required": ["project_path", "other_path"],
+                "additionalProperties": False,
+            },
+            lambda args: self.semantic_model(args).tmdl_diff(args["other_path"]),
+        )
+        self.add_tool(
+            "manage_relationship",
+            (
+                "Create or delete a relationship in the SemanticModel. "
+                "Relationships are written to SemanticModel/definition/relationships.tmdl. "
+                "action='create': add a new relationship with fromColumn → toColumn. "
+                "action='delete': remove the relationship matching from_table.from_column → to_table.to_column. "
+                "cardinality: 'manyToOne' (default), 'oneToOne', 'manyToMany'. "
+                "cross_filter: 'singleDirection' (default), 'bothDirections'. "
+                "active: false marks the relationship as inactive (used for role-playing dimensions)."
+            ),
+            {
+                "type": "object",
+                "properties": {
+                    "project_path": {"type": "string"},
+                    "action": {"type": "string", "enum": ["create", "delete"]},
+                    "from_table": {"type": "string"},
+                    "from_column": {"type": "string"},
+                    "to_table": {"type": "string"},
+                    "to_column": {"type": "string"},
+                    "cardinality": {"type": "string", "enum": ["manyToOne", "oneToOne", "manyToMany"]},
+                    "cross_filter": {"type": "string", "enum": ["singleDirection", "bothDirections"]},
+                    "active": {"type": "boolean", "default": True},
+                },
+                "required": ["project_path", "action", "from_table", "from_column", "to_table", "to_column"],
+                "additionalProperties": False,
+            },
+            lambda args: self.semantic_model(args).manage_relationship(
+                action=args["action"],
+                from_table=args["from_table"],
+                from_column=args["from_column"],
+                to_table=args["to_table"],
+                to_column=args["to_column"],
+                cardinality=args.get("cardinality"),
+                cross_filter=args.get("cross_filter"),
+                active=bool(args.get("active", True)),
+            ),
+        )
+        self.add_tool(
+            "manage_hierarchy",
+            (
+                "Create, delete, or list hierarchies in a SemanticModel table. "
+                "Hierarchies group columns into drill-down levels (e.g. Year → Quarter → Month → Day). "
+                "action='create': add a hierarchy; levels=[{name, column}, ...] required. "
+                "action='delete': remove a hierarchy by name. "
+                "action='list': list all hierarchies in the table."
+            ),
+            {
+                "type": "object",
+                "properties": {
+                    "project_path": {"type": "string"},
+                    "action": {"type": "string", "enum": ["create", "delete", "list"]},
+                    "table": {"type": "string"},
+                    "name": {"type": "string", "description": "Hierarchy name."},
+                    "levels": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "name": {"type": "string"},
+                                "column": {"type": "string"},
+                            },
+                            "required": ["name", "column"],
+                        },
+                        "description": "Hierarchy levels in order. Required for create.",
+                    },
+                },
+                "required": ["project_path", "action", "table"],
+                "additionalProperties": False,
+            },
+            lambda args: self.semantic_model(args).manage_hierarchy(
+                action=args["action"],
+                table=args["table"],
+                name=args.get("name"),
+                levels=args.get("levels"),
+            ),
         )
         self.add_tool(
             "delete_page",
@@ -3498,7 +5560,7 @@ class PBIRMCPServer:
                     "page": {"type": "string"},
                     "validate_after": {"type": "boolean", "default": False},
                 },
-                "required": ["page"],
+                "required": ["project_path", "page"],
                 "additionalProperties": False,
             },
             lambda args: self.report(args).delete_page(
@@ -3520,7 +5582,7 @@ class PBIRMCPServer:
                     "new_name": {"type": "string", "description": "Internal page folder name (auto-generated if omitted)."},
                     "validate_after": {"type": "boolean", "default": False},
                 },
-                "required": ["source_page", "new_display_name"],
+                "required": ["project_path", "source_page", "new_display_name"],
                 "additionalProperties": False,
             },
             lambda args: self.report(args).duplicate_page(
@@ -3547,7 +5609,7 @@ class PBIRMCPServer:
                     },
                     "validate_after": {"type": "boolean", "default": False},
                 },
-                "required": ["page_order"],
+                "required": ["project_path", "page_order"],
                 "additionalProperties": False,
             },
             lambda args: self.report(args).reorder_pages(
@@ -3573,7 +5635,7 @@ class PBIRMCPServer:
                     "show": {"type": "boolean", "description": "Show or hide the title bar."},
                     "validate_after": {"type": "boolean", "default": False},
                 },
-                "required": ["page", "visual"],
+                "required": ["project_path", "page", "visual"],
                 "additionalProperties": False,
             },
             lambda args: self.report(args).set_visual_title(
@@ -3604,7 +5666,7 @@ class PBIRMCPServer:
                     "project_path": {"type": "string"},
                     "code": {"type": "string", "description": "Python code to execute. Set result = ... to return a value."},
                 },
-                "required": ["code"],
+                "required": ["project_path", "code"],
                 "additionalProperties": False,
             },
             lambda args: self._run_python_tool(args["code"], self._build_exec_context(args)),
@@ -3670,7 +5732,7 @@ class PBIRMCPServer:
         )
         self.add_tool(
             "get_current_project",
-            "Return the currently loaded PBIR report project path.",
+            "Return the currently loaded PBIR report project path, or null if none is loaded.",
             schema(),
             lambda args: {"report_root": str(self.current_report.report_root) if self.current_report else None},
         )
@@ -3680,7 +5742,8 @@ class PBIRMCPServer:
             {
                 "type": "object",
                 "properties": {"project_path": {"type": "string"}},
-                "additionalProperties": False,
+                                "required": ["project_path"],
+"additionalProperties": False,
             },
             lambda args: self.report(args).validate().as_dict(),
         )
@@ -3700,7 +5763,8 @@ class PBIRMCPServer:
                     "validate": {"type": "boolean", "default": True},
                     "include_validation_messages": {"type": "boolean", "default": False},
                 },
-                "additionalProperties": False,
+                                "required": ["project_path"],
+"additionalProperties": False,
             },
             self.tool_report_summary,
         )
@@ -3715,7 +5779,8 @@ class PBIRMCPServer:
             {
                 "type": "object",
                 "properties": {"project_path": {"type": "string"}},
-                "additionalProperties": False,
+                                "required": ["project_path"],
+"additionalProperties": False,
             },
             lambda args: self.report(args).get_report_context(),
         )
@@ -3734,7 +5799,7 @@ class PBIRMCPServer:
                     "table": {"type": "string", "description": "Filter results to this table name (partial match)."},
                     "field_type": {"type": "string", "enum": ["column", "measure"], "description": "Return only columns or only measures."},
                 },
-                "required": ["query"],
+                "required": ["project_path", "query"],
                 "additionalProperties": False,
             },
             lambda args: self.report(args).search_semantic_model_fields(
@@ -3749,7 +5814,8 @@ class PBIRMCPServer:
             {
                 "type": "object",
                 "properties": {"project_path": {"type": "string"}},
-                "additionalProperties": False,
+                                "required": ["project_path"],
+"additionalProperties": False,
             },
             lambda args: self.report(args).read_semantic_model(),
         )
@@ -3762,14 +5828,14 @@ class PBIRMCPServer:
                     "search_root": {"type": "string"},
                     "max_depth": {"type": "integer", "default": 4},
                 },
-                "required": ["search_root"],
+                "required": ["project_path", "search_root"],
                 "additionalProperties": False,
             },
             self.tool_list_projects,
         )
         self.add_tool(
             "pbir_apply_plan",
-            "Batch multiple page/visual/theme/role/model actions in one call, validating once at the end. Prefer over individual tools when making several changes. Supported ops: create_page, update_page, delete_page, duplicate_page, reorder_pages, set_active_page, add_visual, clone_visual, set_visual_position, set_visual_title, modify_visual_properties, delete_visual, manage_theme, apply_style_preset, recolor_visuals, set_page_background, bulk_create_rls_roles, set_table_storage_mode, validate.",
+            "Batch multiple page/visual/theme/role/model actions in one call, validating once at the end. Prefer over individual tools when making several changes. Supported ops: create_page, update_page, delete_page, duplicate_page, reorder_pages, set_active_page, add_visual, clone_visual, set_visual_position, set_visual_title, modify_visual_properties, delete_visual, manage_theme, apply_style_preset, recolor_visuals, set_page_background, set_visual_filter, set_page_filter, bulk_create_rls_roles, set_table_storage_mode, manage_measure, manage_perspective, manage_relationship, manage_hierarchy, validate.",
             {
                 "type": "object",
                 "properties": {
@@ -3777,6 +5843,9 @@ class PBIRMCPServer:
                     "dry_run": {"type": "boolean", "default": False},
                     "validate_after": {"type": "boolean", "default": True},
                     "continue_on_error": {"type": "boolean", "default": False},
+                    "auto_undo": {"type": "boolean", "default": True},
+                    "auto_commit": {"type": "boolean", "default": False},
+                    "commit_message": {"type": "string", "default": "PBIR MCP apply plan"},
                     "response": {
                         "type": "object",
                         "properties": {
@@ -3809,7 +5878,8 @@ class PBIRMCPServer:
                     "project_path": {"type": "string"},
                     "include_visuals": {"type": "boolean", "default": False},
                 },
-                "additionalProperties": False,
+                                "required": ["project_path"],
+"additionalProperties": False,
             },
             lambda args: self.report(args).list_pages(bool(args.get("include_visuals", False))),
         )
@@ -3823,7 +5893,8 @@ class PBIRMCPServer:
                     "page": {"type": "string"},
                     "include_bindings": {"type": "boolean", "default": False},
                 },
-                "additionalProperties": False,
+                                "required": ["project_path"],
+"additionalProperties": False,
             },
             lambda args: self.report(args).list_visuals(
                 args.get("page"), include_bindings=bool(args.get("include_bindings", False))
@@ -3843,7 +5914,7 @@ class PBIRMCPServer:
                     "page": {"type": "string"},
                     "visual": {"type": "string"},
                 },
-                "required": ["page", "visual"],
+                "required": ["project_path", "page", "visual"],
                 "additionalProperties": False,
             },
             lambda args: self.report(args).get_visual_detail(args["page"], args["visual"]),
@@ -3862,8 +5933,13 @@ class PBIRMCPServer:
                     "display_option": {"type": "string", "default": "FitToPage"},
                     "make_active": {"type": "boolean", "default": False},
                     "background": {"type": "object"},
+                    "visibility": {
+                        "type": "string",
+                        "enum": ["HiddenInViewMode", ""],
+                        "description": "Hide this page in view/publish mode (drillthrough/tooltip pages). Pass '' to make visible.",
+                    },
                 },
-                "required": ["display_name"],
+                "required": ["project_path", "display_name"],
                 "additionalProperties": False,
             },
             self.tool_create_page,
@@ -3878,7 +5954,7 @@ class PBIRMCPServer:
                     "page": {"type": "string"},
                     "landing": {"type": "boolean", "default": False},
                 },
-                "required": ["page"],
+                "required": ["project_path", "page"],
                 "additionalProperties": False,
             },
             lambda args: self.report(args).set_active_page(args["page"], bool(args.get("landing", False))),
@@ -3889,7 +5965,9 @@ class PBIRMCPServer:
             "query_roles maps each data role to its projection(s). Role names are "
             "normalized per visual type, so chart aliases Axis->Category, Values->Y, "
             "Legend->Series are accepted; cards/tables/slicers use Values; matrix uses "
-            "Rows/Columns/Values. Any rename is reported back in result.role_remaps.",
+            "Rows/Columns/Values; cardVisual uses Data. Any rename is reported back in "
+            "result.role_remaps. sort sets the default sort order. filter_config adds "
+            "visual-level filters.",
             {
                 "type": "object",
                 "properties": {
@@ -3906,15 +5984,37 @@ class PBIRMCPServer:
                             "Map of data role -> projection or list of projections. "
                             "Cartesian charts render Category/Y/Series (aliases "
                             "Axis/Values/Legend are auto-corrected); pie/donut use "
-                            "Category/Y; card/table/slicer use Values; matrix uses "
-                            "Rows/Columns/Values. Each projection is "
-                            "{table, column|measure[, aggregate]} or {raw, queryRef}."
+                            "Category/Y; card/table/slicer use Values; cardVisual uses "
+                            "Data; matrix uses Rows/Columns/Values. Each projection is "
+                            "{table, column|measure[, aggregate]}, "
+                            "{table, hierarchy_level: {level, hierarchy?, auto_date?, "
+                            "variation_name?, variation_property?, column?}}, "
+                            "or {raw, queryRef}."
                         ),
+                    },
+                    "sort": {
+                        "type": "array",
+                        "description": (
+                            "Default sort order. Each entry is a projection spec plus "
+                            "direction ('Ascending' or 'Descending')."
+                        ),
+                        "items": {"type": "object"},
+                    },
+                    "filter_config": {
+                        "type": "array",
+                        "description": (
+                            "Visual-level filters. Each entry is a projection spec plus "
+                            "filter_kind ('in', 'not_in', 'comparison', 'range', 'top_n', 'relative_date'), "
+                            "values/value, operator (eq/lt/le/ge/gt/ne), and type ('Categorical'/'Advanced'). "
+                            "relative_date: {period: 'days'|'weeks'|'months'|'years', count: N, direction: 'last'|'next'|'this'}. "
+                            "Pass filter: {...} directly for raw filter JSON."
+                        ),
+                        "items": {"type": "object"},
                     },
                     "properties": {"type": "object"},
                     "raw_patch": {"type": "object"},
                 },
-                "required": ["page"],
+                "required": ["project_path", "page"],
                 "additionalProperties": False,
             },
             self.tool_add_visual,
@@ -3933,7 +6033,7 @@ class PBIRMCPServer:
                     "title": {"type": "string"},
                     "position": {"type": "object"},
                 },
-                "required": ["source_page", "source_visual", "target_page"],
+                "required": ["project_path", "source_page", "source_visual", "target_page"],
                 "additionalProperties": False,
             },
             self.tool_clone_visual,
@@ -3949,7 +6049,7 @@ class PBIRMCPServer:
                     "visual": {"type": "string"},
                     "position": {"type": "object"},
                 },
-                "required": ["page", "visual", "position"],
+                "required": ["project_path", "page", "visual", "position"],
                 "additionalProperties": False,
             },
             lambda args: self.report(args).set_visual_position(args["page"], args["visual"], args["position"]),
@@ -3965,7 +6065,7 @@ class PBIRMCPServer:
                     "visual": {"type": "string"},
                     "patch": {"type": "object"},
                 },
-                "required": ["page", "visual", "patch"],
+                "required": ["project_path", "page", "visual", "patch"],
                 "additionalProperties": False,
             },
             lambda args: self.report(args).modify_visual_properties(args["page"], args["visual"], args["patch"]),
@@ -3980,10 +6080,326 @@ class PBIRMCPServer:
                     "page": {"type": "string"},
                     "visual": {"type": "string"},
                 },
-                "required": ["page", "visual"],
+                "required": ["project_path", "page", "visual"],
                 "additionalProperties": False,
             },
             lambda args: self.report(args).delete_visual(args["page"], args["visual"]),
+        )
+        self.add_tool(
+            "set_visual_filter",
+            "Set or merge visual-level filters on an existing visual. Each filter entry is a "
+            "projection spec ({table, column|measure|hierarchy_level}) plus filter_kind ('in', "
+            "'not_in', 'comparison', 'range', 'top_n', 'relative_date'), values/value, operator, and type. "
+            "relative_date: add relative_date: {period: 'days'|'weeks'|'months'|'years', count: N, direction: 'last'|'next'|'this'}. "
+            "Pass merge=true to append to existing filters; default replaces all.",
+            {
+                "type": "object",
+                "properties": {
+                    "project_path": {"type": "string"},
+                    "page": {"type": "string"},
+                    "visual": {"type": "string"},
+                    "filters": {
+                        "type": "array",
+                        "items": {"type": "object"},
+                        "description": (
+                            "List of filter specs. Each: {table, column|measure|hierarchy_level, "
+                            "filter_kind ('in'|'not_in'|'comparison'|'range'|'top_n'), "
+                            "values (list for in/not_in), value+operator (comparison), "
+                            "min_value/max_value+include_min/include_max (range), "
+                            "top_n+by_measure[+by_table+bottom] (top_n), "
+                            "type ('Categorical'/'Advanced'/'TopN'), "
+                            "isHiddenInViewMode, isLockedInViewMode. "
+                            "Pass filter: {...} for raw filter JSON."
+                        ),
+                    },
+                    "merge": {
+                        "type": "boolean",
+                        "default": False,
+                        "description": "If true, append to existing filterConfig.filters; otherwise replace.",
+                    },
+                },
+                "required": ["project_path", "page", "visual", "filters"],
+                "additionalProperties": False,
+            },
+            lambda args: self.report(args).set_visual_filter(
+                page=args["page"],
+                visual=args["visual"],
+                filters=args["filters"],
+                merge=bool(args.get("merge", False)),
+            ),
+        )
+        self.add_tool(
+            "set_page_filter",
+            (
+                "Set or replace page-level filters applied to all visuals on a page. "
+                "Accepts the same filter specs as set_visual_filter: "
+                "Categorical IN: {table, column, values: [...]}. "
+                "Categorical NOT IN: {table, column, values: [...], filter_kind: 'not_in'}. "
+                "Comparison: {table, column, operator: '>='|'>'|'<='|'<'|'=', value: ...}. "
+                "Range: {table, column, filter_kind: 'range', min_value, max_value}. "
+                "TopN: {table, column, filter_kind: 'top_n', top_n: N, by_measure: '...'}. "
+                "RelativeDate: {table, column, filter_kind: 'relative_date', relative_date: {period, count, direction}}. "
+                "Raw: {raw: {...}}. Pass filters=[] to clear all page filters. "
+                "Also available as op='set_page_filter' in pbir_apply_plan."
+            ),
+            {
+                "type": "object",
+                "properties": {
+                    "project_path": {"type": "string"},
+                    "page": {"type": "string"},
+                    "filters": {
+                        "type": "array",
+                        "items": {"type": "object", "additionalProperties": True},
+                        "description": "List of filter specs. Pass [] to clear page filters.",
+                    },
+                    "validate_after": {"type": "boolean", "default": False},
+                },
+                "required": ["project_path", "page", "filters"],
+                "additionalProperties": False,
+            },
+            lambda args: self.report(args).set_page_filter(
+                page=args["page"],
+                filters=args.get("filters", []),
+                validate_after=bool(args.get("validate_after", False)),
+            ),
+        )
+        self.add_tool(
+            "manage_visual_calc",
+            (
+                "Add, remove, or list NativeVisualCalculation projections on a visual. "
+                "NativeVisualCalculations are visual-level DAX expressions (RUNNINGSUM, RANK, etc.) "
+                "that appear as extra columns/measures bound to a visual role. "
+                "action='add': add a calc to the named role; requires name (the queryRef/calc name). "
+                "action='remove': remove projections matching name from all roles. "
+                "action='list': list all NativeVisualCalculation projections on the visual."
+            ),
+            {
+                "type": "object",
+                "properties": {
+                    "project_path": {"type": "string"},
+                    "page": {"type": "string"},
+                    "visual": {"type": "string"},
+                    "action": {"type": "string", "enum": ["add", "remove", "list"]},
+                    "role": {"type": "string", "description": "Visual role name (e.g. 'Y', 'Values'). Required for add."},
+                    "name": {"type": "string", "description": "Calc name / queryRef. Required for add/remove."},
+                    "expression": {"type": "object", "description": "Optional PBIR expression object for the calc."},
+                    "validate_after": {"type": "boolean", "default": False},
+                },
+                "required": ["project_path", "page", "visual", "action"],
+                "additionalProperties": False,
+            },
+            lambda args: self.report(args).manage_visual_calc(
+                page=args["page"],
+                visual=args["visual"],
+                action=args["action"],
+                role=args.get("role", ""),
+                name=args.get("name"),
+                expression=args.get("expression"),
+                validate_after=bool(args.get("validate_after", False)),
+            ),
+        )
+        self.add_tool(
+            "list_bookmarks",
+            "List all bookmarks defined in the report.",
+            {
+                "type": "object",
+                "properties": {"project_path": {"type": "string"}},
+                                "required": ["project_path"],
+"additionalProperties": False,
+            },
+            lambda args: {"bookmarks": self.report(args).list_bookmarks()},
+        )
+        self.add_tool(
+            "manage_bookmark",
+            (
+                "Create, delete, or list report bookmarks. "
+                "action='create': create a bookmark that records visual visibility state. "
+                "Supply page + visible_visuals/hidden_visuals to capture which visuals are shown or hidden. "
+                "action='delete': remove a bookmark by name. "
+                "action='list': list all bookmarks. "
+                "Also available as op='manage_bookmark' in pbir_apply_plan."
+            ),
+            {
+                "type": "object",
+                "properties": {
+                    "project_path": {"type": "string"},
+                    "action": {"type": "string", "enum": ["create", "delete", "list"]},
+                    "name": {"type": "string", "description": "Bookmark folder/internal name."},
+                    "display_name": {"type": "string", "description": "Human-readable bookmark name."},
+                    "page": {"type": "string", "description": "Page name (for visibility bookmarks)."},
+                    "visible_visuals": {
+                        "type": "array", "items": {"type": "string"},
+                        "description": "Visual names to mark as visible in this bookmark.",
+                    },
+                    "hidden_visuals": {
+                        "type": "array", "items": {"type": "string"},
+                        "description": "Visual names to mark as hidden in this bookmark.",
+                    },
+                    "validate_after": {"type": "boolean", "default": False},
+                },
+                "required": ["project_path", "action"],
+                "additionalProperties": False,
+            },
+            lambda args: self.report(args).manage_bookmark(
+                action=args["action"],
+                name=args.get("name"),
+                display_name=args.get("display_name"),
+                page=args.get("page"),
+                visible_visuals=args.get("visible_visuals"),
+                hidden_visuals=args.get("hidden_visuals"),
+                validate_after=bool(args.get("validate_after", False)),
+            ),
+        )
+        self.add_tool(
+            "set_conditional_format",
+            (
+                "Bind a measure or column to a visual property for conditional formatting. "
+                "target: shorthand ('backColor', 'fontColor', 'fill', 'calloutValue', 'titleFontColor', 'labelColor', 'dataPointColor') "
+                "or 'section.property' (e.g. 'values.backColor', 'dataPoint.fill'). "
+                "format_type='measure': spec={table, measure} — color-returning measure drives the property. "
+                "format_type='column': spec={table, column[, aggregate: 0-5]} — aggregated column drives the property. "
+                "format_type='clear': removes the conditional format from the target property. "
+                "Gradient and rules formats must be set via raw_patch (modify_visual_properties). "
+                "Also available as op='set_conditional_format' in pbir_apply_plan."
+            ),
+            {
+                "type": "object",
+                "properties": {
+                    "project_path": {"type": "string"},
+                    "page": {"type": "string"},
+                    "visual": {"type": "string"},
+                    "target": {
+                        "type": "string",
+                        "description": "Property to format: 'backColor', 'fontColor', 'calloutValue', 'fill', 'dataPointColor', 'titleFontColor', 'labelColor', or 'section.property'.",
+                    },
+                    "format_type": {
+                        "type": "string",
+                        "enum": ["measure", "column", "clear"],
+                    },
+                    "spec": {
+                        "type": "object",
+                        "description": "For measure: {table, measure}. For column: {table, column[, aggregate]}.",
+                    },
+                    "validate_after": {"type": "boolean", "default": False},
+                },
+                "required": ["project_path", "page", "visual", "target", "format_type"],
+                "additionalProperties": False,
+            },
+            lambda args: self.report(args).set_conditional_format(
+                page=args["page"],
+                visual=args["visual"],
+                target=args["target"],
+                format_type=args["format_type"],
+                spec=args.get("spec", {}),
+                validate_after=bool(args.get("validate_after", False)),
+            ),
+        )
+        self.add_tool(
+            "bulk_visual_op",
+            (
+                "Apply an operation to all visuals on a page that match the given filters. "
+                "op: 'list' (return matched visuals), 'delete', 'hide' (set isHidden=true), 'show' (clear isHidden), "
+                "'update_title' (update.title applied to all matched), 'update_position' (position fields from update). "
+                "filter_type: match by exact visualType string. "
+                "filter_name: match visuals whose name contains this substring. "
+                "filter_bounds: {x_min, x_max, y_min, y_max} — filter by visual position. "
+                "Useful for mass-rebranding, bulk cleanup, or hiding groups of visuals."
+            ),
+            {
+                "type": "object",
+                "properties": {
+                    "project_path": {"type": "string"},
+                    "page": {"type": "string"},
+                    "op": {
+                        "type": "string",
+                        "enum": ["list", "delete", "hide", "show", "update_title", "update_position"],
+                    },
+                    "filter_type": {"type": "string", "description": "Filter by exact visualType."},
+                    "filter_name": {"type": "string", "description": "Filter by name substring."},
+                    "filter_bounds": {
+                        "type": "object",
+                        "description": "Filter by position: {x_min, x_max, y_min, y_max}.",
+                        "properties": {
+                            "x_min": {"type": "number"}, "x_max": {"type": "number"},
+                            "y_min": {"type": "number"}, "y_max": {"type": "number"},
+                        },
+                    },
+                    "update": {
+                        "type": "object",
+                        "description": "For update_title: {title: '...'}. For update_position: position fields.",
+                    },
+                    "validate_after": {"type": "boolean", "default": False},
+                },
+                "required": ["project_path", "page", "op"],
+                "additionalProperties": False,
+            },
+            lambda args: self.report(args).bulk_visual_op(
+                page=args["page"],
+                op=args["op"],
+                filter_type=args.get("filter_type"),
+                filter_name=args.get("filter_name"),
+                filter_bounds=args.get("filter_bounds"),
+                update=args.get("update"),
+                validate_after=bool(args.get("validate_after", False)),
+            ),
+        )
+        self.add_tool(
+            "list_custom_visuals",
+            "List custom (.pbiviz) visuals registered in the report.",
+            {
+                "type": "object",
+                "properties": {"project_path": {"type": "string"}},
+                                "required": ["project_path"],
+"additionalProperties": False,
+            },
+            lambda args: {"custom_visuals": self.report(args).list_custom_visuals()},
+        )
+        self.add_tool(
+            "import_custom_visual",
+            (
+                "Import a .pbiviz custom visual file into the report. "
+                "Copies the file to StaticResources/RegisteredResources/ and registers it in report.json. "
+                "The .pbiviz must be a valid ZIP containing package.json with visual metadata (name, guid, version). "
+                "After import, the visual type is available for add_visual_from_template using the guid as visual_type."
+            ),
+            {
+                "type": "object",
+                "properties": {
+                    "project_path": {"type": "string"},
+                    "pbiviz_path": {"type": "string", "description": "Absolute path to the .pbiviz file to import."},
+                    "validate_after": {"type": "boolean", "default": False},
+                },
+                "required": ["project_path", "pbiviz_path"],
+                "additionalProperties": False,
+            },
+            lambda args: self.report(args).import_custom_visual(
+                pbiviz_path=args["pbiviz_path"],
+                validate_after=bool(args.get("validate_after", False)),
+            ),
+        )
+        self.add_tool(
+            "remove_custom_visual",
+            (
+                "Remove a custom visual registration from report.json. "
+                "Pass the visual guid (as shown by list_custom_visuals). "
+                "Set delete_file=false to keep the .pbiviz file in StaticResources while unregistering it."
+            ),
+            {
+                "type": "object",
+                "properties": {
+                    "project_path": {"type": "string"},
+                    "guid": {"type": "string", "description": "Visual guid to remove."},
+                    "delete_file": {"type": "boolean", "default": True},
+                    "validate_after": {"type": "boolean", "default": False},
+                },
+                "required": ["project_path", "guid"],
+                "additionalProperties": False,
+            },
+            lambda args: self.report(args).remove_custom_visual(
+                guid=args["guid"],
+                delete_file=bool(args.get("delete_file", True)),
+                validate_after=bool(args.get("validate_after", False)),
+            ),
         )
         self.add_tool(
             "manage_theme",
@@ -3998,7 +6414,7 @@ class PBIRMCPServer:
                     "theme": {"type": "object"},
                     "file_name": {"type": "string"},
                 },
-                "required": ["action"],
+                "required": ["project_path", "action"],
                 "additionalProperties": False,
             },
             self.tool_manage_theme,
@@ -4021,10 +6437,386 @@ class PBIRMCPServer:
                     "output_dir": {"type": "string", "description": "Directory to write the export into (e.g. C:\\Users\\RZHOU\\Downloads). The zip is named automatically as <ProjectName>.zip. Defaults to a '<ProjectName> Export' folder next to the project."},
                     "keep_folder": {"type": "boolean", "default": True, "description": "Keep the unzipped staged project folder alongside the .zip (default true). Set false to leave only the .zip."},
                 },
-                "additionalProperties": False,
+                                "required": ["project_path"],
+"additionalProperties": False,
             },
             self.tool_export_project_zip,
         )
+
+        self.add_tool(
+            "pbix_extract",
+            "Extract a zip-backed .pbix/.pbit package to a folder for round-trip editing or inspection.",
+            {
+                "type": "object",
+                "properties": {
+                    "pbix_path": {"type": "string"},
+                    "output_dir": {"type": "string"},
+                    "overwrite": {"type": "boolean", "default": False},
+                },
+                "required": ["pbix_path"],
+                "additionalProperties": False,
+            },
+            lambda args: PBIRReport.extract_pbix(args["pbix_path"], args.get("output_dir"), bool(args.get("overwrite", False))),
+        )
+        self.add_tool(
+            "pbix_package",
+            "Create a .pbix/.pbit file by zipping an extracted package folder.",
+            {
+                "type": "object",
+                "properties": {
+                    "source_dir": {"type": "string"},
+                    "output_path": {"type": "string"},
+                    "overwrite": {"type": "boolean", "default": False},
+                },
+                "required": ["source_dir", "output_path"],
+                "additionalProperties": False,
+            },
+            lambda args: PBIRReport.package_pbix(args["source_dir"], args["output_path"], bool(args.get("overwrite", False))),
+        )
+        self.add_tool(
+            "create_undo_snapshot",
+            "Create a restorable undo snapshot of the current report and referenced SemanticModel.",
+            {
+                "type": "object",
+                "properties": {
+                    "project_path": {"type": "string"},
+                    "label": {"type": "string", "default": "manual"},
+                    "include_semantic_model": {"type": "boolean", "default": True},
+                },
+                "additionalProperties": False,
+            },
+            lambda args: self.report(args).create_undo_snapshot(
+                label=args.get("label", "manual"),
+                include_semantic_model=bool(args.get("include_semantic_model", True)),
+            ),
+        )
+        self.add_tool(
+            "list_undo_snapshots",
+            "List undo snapshots available for this report.",
+            {"type": "object", "properties": {"project_path": {"type": "string"}}, "additionalProperties": False},
+            lambda args: {"snapshots": self.report(args).list_undo_snapshots()},
+        )
+        self.add_tool(
+            "undo_last_action",
+            "Restore the most recent undo snapshot, or a specific snapshot id.",
+            {
+                "type": "object",
+                "properties": {"project_path": {"type": "string"}, "snapshot_id": {"type": "string"}},
+                "additionalProperties": False,
+            },
+            lambda args: self.report(args).undo_last_action(args.get("snapshot_id")),
+        )
+        self.add_tool(
+            "audit_report",
+            "Run a quality audit: empty visuals, crowded pages, layout overflow/overlap, unused measures, and RLS membership checks when membership data is provided.",
+            {
+                "type": "object",
+                "properties": {
+                    "project_path": {"type": "string"},
+                    "max_visuals_per_page": {"type": "integer", "default": 20},
+                    "include_unused_measures": {"type": "boolean", "default": True},
+                    "role_memberships": {"type": "object"},
+                },
+                "additionalProperties": False,
+            },
+            lambda args: self.report(args).audit_report(
+                max_visuals_per_page=int(args.get("max_visuals_per_page", 20)),
+                include_unused_measures=bool(args.get("include_unused_measures", True)),
+                role_memberships=args.get("role_memberships"),
+            ),
+        )
+        self.add_tool(
+            "multi_report_apply_plan",
+            "Apply the same pbir_apply_plan actions across every PBIR/PBIP report discovered under a folder.",
+            {
+                "type": "object",
+                "properties": {
+                    "search_root": {"type": "string"},
+                    "max_depth": {"type": "integer", "default": 4},
+                    "actions": {"type": "array", "items": {"type": "object"}},
+                    "dry_run": {"type": "boolean", "default": False},
+                    "continue_on_error": {"type": "boolean", "default": True},
+                    "validate_after": {"type": "boolean", "default": True},
+                },
+                "required": ["search_root", "actions"],
+                "additionalProperties": False,
+            },
+            self.tool_multi_report_apply_plan,
+        )
+        self.add_tool(
+            "render_report_preview",
+            "Write a lightweight HTML preview showing pages, visual rectangles, titles, visual types, and bindings.",
+            {"type": "object", "properties": {"project_path": {"type": "string"}, "output_path": {"type": "string"}}, "additionalProperties": False},
+            lambda args: self.report(args).render_preview(args.get("output_path")),
+        )
+        self.add_tool(
+            "migrate_report_layout",
+            "Copy pages and visuals from the loaded/source report to a target report, with best-effort field rebinding by matching field names.",
+            {
+                "type": "object",
+                "properties": {
+                    "project_path": {"type": "string"},
+                    "target_project_path": {"type": "string"},
+                    "overwrite_pages": {"type": "boolean", "default": False},
+                    "remap_fields": {"type": "boolean", "default": True},
+                },
+                "required": ["target_project_path"],
+                "additionalProperties": False,
+            },
+            lambda args: self.report(args).migrate_layout_to(
+                args["target_project_path"],
+                overwrite_pages=bool(args.get("overwrite_pages", False)),
+                remap_fields=bool(args.get("remap_fields", True)),
+            ),
+        )
+        self.add_tool(
+            "add_measure_from_template",
+            "Create or update a DAX measure from a curated template.",
+            {
+                "type": "object",
+                "properties": {
+                    "project_path": {"type": "string"},
+                    "template": {"type": "string"},
+                    "table": {"type": "string"},
+                    "name": {"type": "string"},
+                    "params": {"type": "object"},
+                    "action": {"type": "string", "enum": ["create", "update"], "default": "create"},
+                },
+                "required": ["template", "table", "name"],
+                "additionalProperties": False,
+            },
+            lambda args: self.semantic_model(args).add_measure_from_template(
+                template=args["template"],
+                table=args["table"],
+                name=args["name"],
+                params=args.get("params"),
+                action=args.get("action", "create"),
+            ),
+        )
+        self.add_tool(
+            "powerbi_service_request",
+            "Call the Power BI REST API using args.token or POWERBI_ACCESS_TOKEN.",
+            {
+                "type": "object",
+                "properties": {
+                    "method": {"type": "string", "default": "GET"},
+                    "path": {"type": "string"},
+                    "body": {"type": "object"},
+                    "token": {"type": "string"},
+                    "base_url": {"type": "string"},
+                },
+                "required": ["path"],
+                "additionalProperties": False,
+            },
+            lambda args: self._powerbi_service_request(args.get("method", "GET"), args["path"], args.get("body"), args.get("token"), args.get("base_url")),
+        )
+        self.add_tool(
+            "powerbi_refresh_dataset",
+            "Trigger a Power BI Service dataset refresh.",
+            {
+                "type": "object",
+                "properties": {
+                    "dataset_id": {"type": "string"},
+                    "workspace_id": {"type": "string"},
+                    "notify_option": {"type": "string", "default": "NoNotification"},
+                    "token": {"type": "string"},
+                },
+                "required": ["dataset_id"],
+                "additionalProperties": False,
+            },
+            lambda args: self._powerbi_service_request(
+                "POST",
+                f"/groups/{args['workspace_id']}/datasets/{args['dataset_id']}/refreshes" if args.get("workspace_id") else f"/datasets/{args['dataset_id']}/refreshes",
+                {"notifyOption": args.get("notify_option", "NoNotification")},
+                args.get("token"),
+                None,
+            ),
+        )
+        self.add_tool(
+            "cross_report_index",
+            "Index reports under a folder and answer cross-report questions about measure usage, missing RLS, or visual types.",
+            {
+                "type": "object",
+                "properties": {
+                    "search_root": {"type": "string"},
+                    "max_depth": {"type": "integer", "default": 4},
+                    "measure": {"type": "string"},
+                    "visual_type": {"type": "string"},
+                    "reports_without_rls": {"type": "boolean", "default": False},
+                },
+                "required": ["search_root"],
+                "additionalProperties": False,
+            },
+            self.tool_cross_report_index,
+        )
+        self.add_tool(
+            "commit_report_version",
+            "Git add and commit the report and referenced SemanticModel as a version snapshot.",
+            {"type": "object", "properties": {"project_path": {"type": "string"}, "message": {"type": "string"}}, "additionalProperties": False},
+            lambda args: self.report(args).git_commit(args.get("message", "PBIR MCP snapshot")),
+        )
+        self.add_tool(
+            "rollback_report_version",
+            "Restore the report and referenced SemanticModel paths from a git ref.",
+            {
+                "type": "object",
+                "properties": {"project_path": {"type": "string"}, "ref": {"type": "string"}},
+                "required": ["ref"],
+                "additionalProperties": False,
+            },
+            lambda args: self.report(args).git_rollback(args["ref"]),
+        )
+
+    def discover_reports(self, search_root: str | Path, max_depth: int = 4) -> list[PBIRReport]:
+        root = Path(search_root).expanduser().resolve()
+        if not root.exists():
+            raise PBIRError(f"Search root does not exist: {root}")
+        seen: set[Path] = set()
+        reports: list[PBIRReport] = []
+
+        def add_candidate(path: Path) -> None:
+            try:
+                report_root = PBIRReport.resolve_report_root(path)
+            except PBIRError:
+                return
+            if report_root not in seen:
+                seen.add(report_root)
+                reports.append(PBIRReport(report_root))
+
+        def scan(path: Path, depth: int) -> None:
+            if depth > max_depth:
+                return
+            if path.name.startswith(".") and path != root:
+                return
+            if path.is_file() and path.suffix.lower() == ".pbip":
+                add_candidate(path)
+                return
+            if path.is_dir():
+                if path.suffix.lower() == ".report" and (path / "definition.pbir").exists():
+                    add_candidate(path)
+                    return
+                try:
+                    children = sorted(path.iterdir(), key=lambda p: p.name.lower())
+                except PermissionError:
+                    return
+                for child in children:
+                    scan(child, depth + 1)
+
+        scan(root, 0)
+        return reports
+
+    def _powerbi_service_request(
+        self,
+        method: str,
+        path: str,
+        body: dict[str, Any] | None = None,
+        token: str | None = None,
+        base_url: str | None = None,
+    ) -> dict[str, Any]:
+        import os
+        import urllib.error
+        import urllib.request
+        token = token or os.environ.get("POWERBI_ACCESS_TOKEN")
+        if not token:
+            raise PBIRError("Power BI access token is required. Pass token or set POWERBI_ACCESS_TOKEN.")
+        base = (base_url or "https://api.powerbi.com/v1.0/myorg").rstrip("/")
+        url = path if path.lower().startswith(("http://", "https://")) else base + "/" + path.lstrip("/")
+        data = json.dumps(body).encode("utf-8") if body is not None else None
+        headers = {"Authorization": f"Bearer {token}"}
+        if data is not None:
+            headers["Content-Type"] = "application/json"
+        req = urllib.request.Request(url, data=data, method=method.upper(), headers=headers)
+        try:
+            with urllib.request.urlopen(req, timeout=60) as resp:
+                raw = resp.read().decode("utf-8", errors="replace")
+                parsed: Any
+                try:
+                    parsed = json.loads(raw) if raw else None
+                except json.JSONDecodeError:
+                    parsed = raw
+                return {"status": resp.status, "url": url, "body": parsed}
+        except urllib.error.HTTPError as exc:
+            raw = exc.read().decode("utf-8", errors="replace")
+            try:
+                parsed = json.loads(raw) if raw else None
+            except json.JSONDecodeError:
+                parsed = raw
+            raise PBIRError(f"Power BI REST request failed ({exc.code}) {url}: {parsed}") from exc
+
+    def tool_multi_report_apply_plan(self, args: dict[str, Any]) -> dict[str, Any]:
+        reports = self.discover_reports(args["search_root"], int(args.get("max_depth", 4)))
+        results = []
+        errors = []
+        dry_run = bool(args.get("dry_run", False))
+        continue_on_error = bool(args.get("continue_on_error", True))
+        for report in reports:
+            try:
+                local_args = {
+                    "project_path": str(report.report_root),
+                    "actions": args["actions"],
+                    "dry_run": dry_run,
+                    "continue_on_error": continue_on_error,
+                    "validate_after": bool(args.get("validate_after", True)),
+                }
+                result = self.tool_apply_plan(local_args)
+                results.append({"report_root": str(report.report_root), "result": result})
+            except Exception as exc:
+                item = {"report_root": str(report.report_root), "error": str(exc)}
+                errors.append(item)
+                results.append(item)
+                if not continue_on_error:
+                    break
+        return {
+            "search_root": str(Path(args["search_root"]).expanduser().resolve()),
+            "report_count": len(reports),
+            "success_count": len([r for r in results if "result" in r and r["result"].get("ok")]),
+            "error_count": len(errors),
+            "results": results,
+        }
+
+    def tool_cross_report_index(self, args: dict[str, Any]) -> dict[str, Any]:
+        reports = self.discover_reports(args["search_root"], int(args.get("max_depth", 4)))
+        indexed = []
+        measure_filter = (args.get("measure") or "").lower()
+        visual_type_filter = (args.get("visual_type") or "").lower()
+        only_without_rls = bool(args.get("reports_without_rls", False))
+        for report in reports:
+            entry: dict[str, Any] = {"report_root": str(report.report_root), "name": report.report_root.stem}
+            try:
+                visuals = report.list_visuals(include_bindings=True)["visuals"]
+                roles = []
+                sm = PBIRSemanticModel.from_report(report.report_root)
+                if sm:
+                    roles = sm.list_roles()
+                measure_uses = []
+                visual_hits = []
+                for visual in visuals:
+                    if visual_type_filter and str(visual.get("visualType", "")).lower() == visual_type_filter:
+                        visual_hits.append({k: visual.get(k) for k in ("page", "name", "title", "visualType")})
+                    for binding in visual.get("bindings") or []:
+                        if "measure" in str(binding.get("kind", "")):
+                            measure_name = str(binding.get("name", ""))
+                            if not measure_filter or measure_filter == measure_name.lower():
+                                measure_uses.append({
+                                    "measure": measure_name,
+                                    "table": binding.get("table"),
+                                    "page": visual.get("page"),
+                                    "visual": visual.get("name"),
+                                    "visualType": visual.get("visualType"),
+                                })
+                entry.update({
+                    "page_count": len(report.page_dirs()),
+                    "visual_count": len(visuals),
+                    "rls_role_count": len(roles),
+                    "measure_uses": measure_uses,
+                    "visual_type_matches": visual_hits,
+                })
+            except Exception as exc:
+                entry["error"] = str(exc)
+            if only_without_rls and entry.get("rls_role_count"):
+                continue
+            indexed.append(entry)
+        return {"report_count": len(indexed), "reports": indexed}
 
     def tool_report_summary(self, args: dict[str, Any]) -> dict[str, Any]:
         return self.report(args).report_summary(
@@ -4041,15 +6833,51 @@ class PBIRMCPServer:
     def tool_apply_plan(self, args: dict[str, Any]) -> dict[str, Any]:
         report = self.report(args)
         dry_run = bool(args.get("dry_run", False))
+        self.emit_progress({
+            "tool": "pbir_apply_plan",
+            "phase": "started",
+            "report_root": str(report.report_root),
+            "dry_run": dry_run,
+            "actions_total": len(args.get("actions") or []) if isinstance(args.get("actions"), list) else None,
+        })
         if dry_run:
             with tempfile.TemporaryDirectory(prefix="pbir-plan-") as temp:
                 temp_report_root = Path(temp) / report.report_root.name
                 shutil.copytree(report.report_root, temp_report_root)
+                sm_path = report.semantic_model_path()
+                if sm_path and sm_path.exists():
+                    shutil.copytree(sm_path, Path(temp) / sm_path.name)
                 working_report = PBIRReport(temp_report_root)
                 result = self.apply_plan_to_report(working_report, args, dry_run=True)
                 result["source_report_root"] = str(report.report_root)
+                self.emit_progress({
+                    "tool": "pbir_apply_plan",
+                    "phase": "finished",
+                    "report_root": str(report.report_root),
+                    "dry_run": True,
+                    "ok": bool(result.get("ok")),
+                    "actions_applied": result.get("actions_applied"),
+                    "actions_failed": result.get("actions_failed"),
+                })
                 return result
-        return self.apply_plan_to_report(report, args, dry_run=False)
+        snapshot = None
+        if bool(args.get("auto_undo", True)):
+            snapshot = report.create_undo_snapshot("before pbir_apply_plan")
+        result = self.apply_plan_to_report(report, args, dry_run=False)
+        if snapshot:
+            result["undo_snapshot"] = snapshot
+        if result.get("ok") and bool(args.get("auto_commit", False)):
+            result["git_commit"] = report.git_commit(args.get("commit_message", "PBIR MCP apply plan"))
+        self.emit_progress({
+            "tool": "pbir_apply_plan",
+            "phase": "finished",
+            "report_root": str(report.report_root),
+            "dry_run": False,
+            "ok": bool(result.get("ok")),
+            "actions_applied": result.get("actions_applied"),
+            "actions_failed": result.get("actions_failed"),
+        })
+        return result
 
     def apply_plan_to_report(self, report: PBIRReport, args: dict[str, Any], dry_run: bool) -> dict[str, Any]:
         actions = args.get("actions")
@@ -4083,16 +6911,46 @@ class PBIRMCPServer:
                 continue
 
             op = str(action.get("op") or "")
+            self.emit_progress({
+                "tool": "pbir_apply_plan",
+                "phase": "action_started",
+                "report_root": str(report.report_root),
+                "dry_run": dry_run,
+                "action_index": index,
+                "actions_total": len(actions),
+                "op": op or None,
+            })
             try:
                 result = self.apply_plan_action(report, action)
                 applied += 1
                 compact = self.compact_plan_action_result(index, op, result)
                 self.collect_plan_changes(op, compact, created, changed, deleted)
+                self.emit_progress({
+                    "tool": "pbir_apply_plan",
+                    "phase": "action_finished",
+                    "report_root": str(report.report_root),
+                    "dry_run": dry_run,
+                    "action_index": index,
+                    "actions_total": len(actions),
+                    "op": op or None,
+                    "ok": True,
+                })
                 if include_action_results == "all":
                     action_results.append(compact)
             except Exception as exc:
                 item = {"index": index, "op": op or None, "ok": False, "error": str(exc)}
                 errors.append(item)
+                self.emit_progress({
+                    "tool": "pbir_apply_plan",
+                    "phase": "action_finished",
+                    "report_root": str(report.report_root),
+                    "dry_run": dry_run,
+                    "action_index": index,
+                    "actions_total": len(actions),
+                    "op": op or None,
+                    "ok": False,
+                    "error": str(exc),
+                })
                 if include_action_results in {"errors", "all"}:
                     action_results.append(item)
                 if not continue_on_error:
@@ -4145,6 +7003,7 @@ class PBIRMCPServer:
                 display_option=action.get("display_option", action.get("displayOption", "FitToPage")),
                 make_active=bool(action.get("make_active", action.get("makeActive", False))),
                 background=action.get("background"),
+                visibility=action.get("visibility"),
                 validate_after=False,
             )
         if op == "update_page":
@@ -4158,6 +7017,7 @@ class PBIRMCPServer:
                 width=float(width) if width is not None else None,
                 height=float(height) if height is not None else None,
                 display_option=display_option or None,
+                visibility=action.get("visibility"),
                 validate_after=False,
             )
         if op == "set_active_page":
@@ -4175,8 +7035,24 @@ class PBIRMCPServer:
                 position=action.get("position"),
                 visual_type=action.get("visual_type", action.get("visualType")),
                 query_roles=action.get("query_roles", action.get("queryRoles")),
+                sort=action.get("sort"),
+                filter_config=action.get("filter_config", action.get("filterConfig")),
                 properties=action.get("properties"),
                 raw_patch=action.get("raw_patch", action.get("rawPatch")),
+                validate_after=False,
+            )
+        if op == "set_visual_filter":
+            return report.set_visual_filter(
+                page=action["page"],
+                visual=action["visual"],
+                filters=action["filters"],
+                merge=bool(action.get("merge", False)),
+                validate_after=False,
+            )
+        if op == "set_page_filter":
+            return report.set_page_filter(
+                page=action["page"],
+                filters=action.get("filters", []),
                 validate_after=False,
             )
         if op == "clone_visual":
@@ -4290,12 +7166,100 @@ class PBIRMCPServer:
                 mode=action["mode"],
                 dry_run=bool(action.get("dry_run", False)),
             )
+        if op == "manage_measure":
+            sm = PBIRSemanticModel.from_report(report.report_root)
+            if sm is None:
+                raise PBIRError("No SemanticModel found next to this report.")
+            return sm.manage_measure(
+                action=action["action"],
+                table=action["table"],
+                name=action["name"],
+                dax=action.get("dax"),
+                format_string=action.get("format_string"),
+                display_folder=action.get("display_folder"),
+                description=action.get("description"),
+            )
+        if op == "add_measure_from_template":
+            sm = PBIRSemanticModel.from_report(report.report_root)
+            if sm is None:
+                raise PBIRError("No SemanticModel found next to this report.")
+            return sm.add_measure_from_template(
+                template=action["template"],
+                table=action["table"],
+                name=action["name"],
+                params=action.get("params"),
+                action=action.get("action", "create"),
+            )
+        if op == "manage_perspective":
+            sm = PBIRSemanticModel.from_report(report.report_root)
+            if sm is None:
+                raise PBIRError("No SemanticModel found next to this report.")
+            return sm.manage_perspective(
+                action=action["action"],
+                name=action["name"],
+                tables=action.get("tables"),
+            )
+        if op == "manage_relationship":
+            sm = PBIRSemanticModel.from_report(report.report_root)
+            if sm is None:
+                raise PBIRError("No SemanticModel found next to this report.")
+            return sm.manage_relationship(
+                action=action["action"],
+                from_table=action["from_table"],
+                from_column=action["from_column"],
+                to_table=action["to_table"],
+                to_column=action["to_column"],
+                cardinality=action.get("cardinality"),
+                cross_filter=action.get("cross_filter"),
+                active=bool(action.get("active", True)),
+            )
+        if op == "manage_hierarchy":
+            sm = PBIRSemanticModel.from_report(report.report_root)
+            if sm is None:
+                raise PBIRError("No SemanticModel found next to this report.")
+            return sm.manage_hierarchy(
+                action=action["action"],
+                table=action["table"],
+                name=action["name"],
+                levels=action.get("levels"),
+            )
+        if op == "manage_bookmark":
+            return report.manage_bookmark(
+                action=action["action"],
+                name=action.get("name"),
+                display_name=action.get("display_name", action.get("displayName")),
+                page=action.get("page"),
+                visible_visuals=action.get("visible_visuals", action.get("visibleVisuals")),
+                hidden_visuals=action.get("hidden_visuals", action.get("hiddenVisuals")),
+                validate_after=False,
+            )
+        if op == "set_conditional_format":
+            return report.set_conditional_format(
+                page=action["page"],
+                visual=action["visual"],
+                target=action["target"],
+                format_type=action["format_type"],
+                spec=action.get("spec", {}),
+                validate_after=False,
+            )
+        if op == "bulk_visual_op":
+            return report.bulk_visual_op(
+                page=action["page"],
+                op=action.get("bulk_op") or action.get("inner_op", "list"),
+                filter_type=action.get("filter_type"),
+                filter_name=action.get("filter_name"),
+                filter_bounds=action.get("filter_bounds"),
+                update=action.get("update"),
+                validate_after=False,
+            )
         raise PBIRError(
             "Unknown plan action op. Valid ops: create_page, update_page, set_active_page, delete_page, "
             "duplicate_page, reorder_pages, add_visual, clone_visual, set_visual_position, "
             "modify_visual_properties, set_visual_title, delete_visual, recolor_visuals, "
             "set_page_background, manage_theme, apply_style_preset, bulk_create_rls_roles, "
-            "set_table_storage_mode, validate."
+            "set_table_storage_mode, manage_measure, manage_perspective, manage_relationship, "
+            "manage_hierarchy, set_page_filter, set_visual_filter, manage_bookmark, "
+            "set_conditional_format, bulk_visual_op, validate."
         )
 
     @staticmethod
@@ -4344,7 +7308,7 @@ class PBIRMCPServer:
             created["pages"].append(page.get("name"))
         elif op in {"add_visual", "add_visual_from_template", "clone_visual"} and isinstance(visual, dict):
             created["visuals"].append({"page": visual.get("page"), "name": visual.get("name")})
-        elif op in {"set_visual_position", "modify_visual_properties", "patch_visual"} and isinstance(visual, dict):
+        elif op in {"set_visual_position", "modify_visual_properties", "patch_visual", "set_visual_filter"} and isinstance(visual, dict):
             changed["visuals"].append({"page": visual.get("page"), "name": visual.get("name")})
         elif op == "update_page" and isinstance(page, dict):
             changed["pages"].append(page.get("name"))
@@ -4391,19 +7355,32 @@ class PBIRMCPServer:
             "semantic_model_path": str(folder / f"{name}.SemanticModel"),
             "validation": validation_summary(report.validate().as_dict(), include_messages=True),
             "next_step": (
+                "IMPORTANT: all subsequent tool calls must pass project_path=report_root to identify this project. "
                 "Use powerbi-modeling-mcp connection_operations/Connect then "
                 "table_operations/Create + measure_operations/Create, then "
                 "database_operations/ExportToTmdlFolder targeting the semantic_model_path above. "
-                "After that call read_semantic_model to get entity names, then pbir_apply_plan to add visuals."
+                "After that call read_semantic_model (with project_path=report_root) to get entity names, "
+                "then pbir_apply_plan to add visuals."
             ),
         }
 
     def tool_export_project_zip(self, args: dict[str, Any]) -> dict[str, Any]:
-        return self.report(args).export_project(
+        from urllib.parse import quote
+        result = self.report(args).export_project(
             output_dir=args.get("output_dir"),
             zip_path=None,
             keep_folder=bool(args.get("keep_folder", True)),
         )
+        zip_path = result.get("zip_path", "")
+        if zip_path:
+            filename = Path(zip_path).name
+            result["download_url"] = f"/api/hermes/download?path={quote(zip_path)}&name={quote(filename)}"
+            result["message"] = (
+                f"Project exported to {zip_path} ({result.get('size_kb', '?')} KB). "
+                f"Present the download_url as a clickable markdown link so the user can download the zip: "
+                f"[Download {filename}]({result['download_url']})"
+            )
+        return result
 
     def tool_generate_theme(self, args: dict[str, Any]) -> dict[str, Any]:
         return self.report(args).generate_theme(
@@ -4497,11 +7474,6 @@ class PBIRMCPServer:
         if project_path:
             ctx["report"] = PBIRReport(project_path)
             sm = PBIRSemanticModel.from_report(ctx["report"].report_root)
-            if sm:
-                ctx["sm"] = sm
-        elif self.current_report:
-            ctx["report"] = self.current_report
-            sm = PBIRSemanticModel.from_report(self.current_report.report_root)
             if sm:
                 ctx["sm"] = sm
         return ctx
@@ -4629,6 +7601,7 @@ class PBIRMCPServer:
             display_option=args.get("display_option", "FitToPage"),
             make_active=bool(args.get("make_active", False)),
             background=args.get("background"),
+            visibility=args.get("visibility"),
         )
 
     def tool_add_visual(self, args: dict[str, Any]) -> dict[str, Any]:
@@ -4640,6 +7613,8 @@ class PBIRMCPServer:
             position=args.get("position"),
             visual_type=args.get("visual_type"),
             query_roles=args.get("query_roles"),
+            sort=args.get("sort"),
+            filter_config=args.get("filter_config"),
             properties=args.get("properties"),
             raw_patch=args.get("raw_patch"),
         )
@@ -4676,7 +7651,7 @@ class PBIRMCPServer:
                         "Step 1: load a .pbip, .pbir, .Report, or definition folder path. "
                         "Step 2: call get_report_context for a full overview of pages, visuals, and theme before making any changes. "
                         "Step 3: batch all edits with pbir_apply_plan (validates once at the end) — avoid separate single-tool calls when multiple changes are needed. "
-                        "Step 4: validate with pbir_validate_report before asking the user to reopen in Power BI Desktop. "
+                        "Step 4: validate with validate_report before asking the user to reopen in Power BI Desktop. "
                         "Use run_python for data exploration or custom calculations not covered by the built-in tools."
                     ),
                 },
@@ -4777,6 +7752,100 @@ def run() -> None:
                     "error": {"code": -32603, "message": str(exc)},
                 }
             )
+
+
+def run_sse(host: str = "127.0.0.1", port: int = 8765) -> None:
+    """Run a small HTTP/SSE transport for local MCP-style JSON-RPC calls.
+
+    GET  /events  opens an event stream.
+    POST /message accepts one JSON-RPC message and returns its JSON-RPC response.
+    """
+    import http.server
+    import queue
+    import threading
+    import urllib.parse
+
+    mcp_server = PBIRMCPServer()
+    subscribers: list[queue.Queue[str]] = []
+
+    def publish(event: dict[str, Any]) -> None:
+        payload = json.dumps(event, ensure_ascii=False)
+        for q in list(subscribers):
+            q.put(payload)
+
+    mcp_server.progress_callback = publish
+
+    class Handler(http.server.BaseHTTPRequestHandler):
+        protocol_version = "HTTP/1.1"
+
+        def log_message(self, fmt: str, *args: Any) -> None:
+            print(fmt % args, file=sys.stderr)
+
+        def do_GET(self) -> None:
+            parsed = urllib.parse.urlparse(self.path)
+            if parsed.path != "/events":
+                self.send_error(404)
+                return
+            self.send_response(200)
+            self.send_header("Content-Type", "text/event-stream; charset=utf-8")
+            self.send_header("Cache-Control", "no-cache")
+            self.send_header("Connection", "keep-alive")
+            self.end_headers()
+            q: queue.Queue[str] = queue.Queue()
+            subscribers.append(q)
+            try:
+                self.wfile.write(b"event: ready\ndata: {}\n\n")
+                self.wfile.flush()
+                while True:
+                    try:
+                        payload = q.get(timeout=15)
+                        self.wfile.write(f"event: message\ndata: {payload}\n\n".encode("utf-8"))
+                    except queue.Empty:
+                        self.wfile.write(b": keepalive\n\n")
+                    self.wfile.flush()
+            except (BrokenPipeError, ConnectionError):
+                pass
+            finally:
+                if q in subscribers:
+                    subscribers.remove(q)
+
+        def do_POST(self) -> None:
+            parsed = urllib.parse.urlparse(self.path)
+            if parsed.path != "/message":
+                self.send_error(404)
+                return
+            length = int(self.headers.get("Content-Length", "0"))
+            try:
+                message = json.loads(self.rfile.read(length).decode("utf-8"))
+                publish({"phase": "received", "method": message.get("method"), "id": message.get("id")})
+                response = mcp_server.handle_request(message)
+                body = json.dumps(response or {}, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+                publish({"phase": "completed", "method": message.get("method"), "id": message.get("id")})
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+            except Exception as exc:
+                body = json.dumps({"error": str(exc)}, ensure_ascii=False).encode("utf-8")
+                self.send_response(500)
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+
+    if len(sys.argv) > 1:
+        host = sys.argv[1]
+    if len(sys.argv) > 2:
+        port = int(sys.argv[2])
+    httpd = http.server.ThreadingHTTPServer((host, port), Handler)
+    print(f"{SERVER_NAME} SSE transport listening on http://{host}:{port}", file=sys.stderr)
+    try:
+        httpd.serve_forever()
+    except KeyboardInterrupt:
+        pass
+    finally:
+        httpd.server_close()
 
 
 if __name__ == "__main__":

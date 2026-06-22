@@ -13,6 +13,7 @@ from pbir_mcp_server import (
     VERSION_SCHEMA,
     PBIRReport,
     PBIRMCPServer,
+    PBIRSemanticModel,
     normalize_query_roles,
     unknown_query_roles,
 )
@@ -511,6 +512,346 @@ class PBIRReportTests(unittest.TestCase):
             self.assertIn("Sales", names)
             self.assertIn("Other", names)
             self.assertEqual(result["project_count"], 2)
+
+    def test_current_project_after_load(self) -> None:
+        with temp_dir() as temp:
+            report_dir = make_fixture(Path(temp))
+            server = PBIRMCPServer()
+            loaded = server.tool_load_project({"project_path": str(report_dir)})
+            current = server.tools["get_current_project"][2]({})
+            self.assertEqual(current["report_root"], loaded["report_root"])
+
+    def test_pbix_round_trip_zip_helpers(self) -> None:
+        with temp_dir() as temp:
+            root = Path(temp)
+            package_dir = root / "pkg"
+            package_dir.mkdir()
+            (package_dir / "Report").write_text("report", encoding="utf-8")
+            pbix = root / "sample.pbix"
+            packed = PBIRReport.package_pbix(package_dir, pbix)
+            self.assertEqual(packed["file_count"], 1)
+            extracted = PBIRReport.extract_pbix(pbix, root / "extract")
+            self.assertTrue((Path(extracted["extract_dir"]) / "Report").exists())
+
+    def test_pbix_extract_rejects_unsafe_members(self) -> None:
+        import zipfile
+
+        with temp_dir() as temp:
+            root = Path(temp)
+            pbix = root / "unsafe.pbix"
+            with zipfile.ZipFile(pbix, "w") as zf:
+                zf.writestr("../outside.txt", "bad")
+            with self.assertRaisesRegex(Exception, "escapes output folder"):
+                PBIRReport.extract_pbix(pbix, root / "extract")
+
+    def test_pbix_package_skips_output_inside_source(self) -> None:
+        import zipfile
+
+        with temp_dir() as temp:
+            root = Path(temp)
+            package_dir = root / "pkg"
+            package_dir.mkdir()
+            (package_dir / "Report").write_text("report", encoding="utf-8")
+            pbix = package_dir / "sample.pbix"
+            packed = PBIRReport.package_pbix(package_dir, pbix)
+            self.assertEqual(packed["file_count"], 1)
+            with zipfile.ZipFile(pbix, "r") as zf:
+                self.assertEqual(zf.namelist(), ["Report"])
+
+    def test_undo_snapshot_restores_report(self) -> None:
+        with temp_dir() as temp:
+            root = Path(temp)
+            report = PBIRReport.scaffold_project(root, "UndoTest")
+            snap = report.create_undo_snapshot("before rename", include_semantic_model=False)
+            report.update_page("Overview", display_name="Changed")
+            report.undo_last_action(snap["id"])
+            page_json = json.loads((report.pages_dir / "Overview" / "page.json").read_text(encoding="utf-8"))
+            self.assertEqual(page_json["displayName"], "Overview")
+
+    def test_audit_report_flags_unbound_visual_and_preview(self) -> None:
+        with temp_dir() as temp:
+            root = Path(temp)
+            report = PBIRReport.scaffold_project(root, "AuditTest")
+            report.add_visual_from_template("Overview", template="card", name="EmptyCard")
+            audit = report.audit_report()
+            self.assertTrue(any(i["code"] == "visual_without_bindings" for i in audit["issues"]))
+            preview = report.render_preview(root / "preview.html")
+            self.assertTrue(Path(preview["preview_path"]).exists())
+
+    def test_add_measure_from_template(self) -> None:
+        with temp_dir() as temp:
+            root = Path(temp)
+            report = PBIRReport.scaffold_project(root, "MeasureTest")
+            sm_root = root / "MeasureTest.SemanticModel"
+            definition = sm_root / "definition"
+            tables = definition / "tables"
+            tables.mkdir(parents=True)
+            (definition / "model.tmdl").write_text("model\n\nref table Sales\n", encoding="utf-8")
+            (tables / "Sales.tmdl").write_text("table Sales\n\n\tcolumn Amount\n\t\tdataType: double\n", encoding="utf-8")
+            sm = PBIRSemanticModel.from_report(report.report_root)
+            self.assertIsNotNone(sm)
+            result = sm.add_measure_from_template("total", "Sales", "Total Amount", {"column": "Amount"})
+            self.assertEqual(result["action"], "created")
+            self.assertIn("Total Amount", (tables / "Sales.tmdl").read_text(encoding="utf-8"))
+
+    def test_multi_report_apply_plan_updates_each_report(self) -> None:
+        with temp_dir() as temp:
+            root = Path(temp)
+            first = PBIRReport.scaffold_project(root, "MultiOne")
+            second = PBIRReport.scaffold_project(root, "MultiTwo")
+            server = PBIRMCPServer()
+            result = server.tool_multi_report_apply_plan({
+                "search_root": str(root),
+                "actions": [{"op": "update_page", "page": "Overview", "display_name": "Updated"}],
+                "validate_after": False,
+            })
+            self.assertEqual(result["success_count"], 2)
+            for report in (first, second):
+                page_json = json.loads((report.pages_dir / "Overview" / "page.json").read_text(encoding="utf-8"))
+                self.assertEqual(page_json["displayName"], "Updated")
+                self.assertEqual(len(report.list_undo_snapshots()), 1)
+
+    def test_migrate_report_layout_remaps_matching_fields(self) -> None:
+        with temp_dir() as temp:
+            root = Path(temp)
+            source = PBIRReport.scaffold_project(root, "SourceReport")
+            target = PBIRReport.scaffold_project(root, "TargetReport")
+            target_definition = root / "TargetReport.SemanticModel" / "definition"
+            target_tables = target_definition / "tables"
+            target_tables.mkdir(parents=True, exist_ok=True)
+            (target_definition / "model.tmdl").write_text("model\n\nref table Orders\n", encoding="utf-8")
+            (target_tables / "Orders.tmdl").write_text("table Orders\n\n\tcolumn Amount\n\t\tdataType: double\n", encoding="utf-8")
+
+            source.create_page("Detail", name="Detail", validate_after=False)
+            source.add_visual_from_template(
+                "Detail",
+                template="card",
+                name="AmountCard",
+                query_roles={"Values": [{"table": "Sales", "column": "Amount"}]},
+                validate_after=False,
+            )
+            result = source.migrate_layout_to(target.report_root, remap_fields=True)
+            self.assertEqual(result["copied_pages"], ["Detail"])
+            self.assertEqual(result["field_remaps"][0]["to_table"], "Orders")
+            migrated_visual = json.loads((target.pages_dir / "Detail" / "visuals" / "AmountCard" / "visual.json").read_text(encoding="utf-8"))
+            self.assertIn("Orders", json.dumps(migrated_visual))
+
+    def test_cross_report_index_finds_measure_usage(self) -> None:
+        with temp_dir() as temp:
+            root = Path(temp)
+            first = PBIRReport.scaffold_project(root, "IndexOne")
+            PBIRReport.scaffold_project(root, "IndexTwo")
+            first.add_visual_from_template(
+                "Overview",
+                template="card",
+                name="RevenueCard",
+                query_roles={"Values": [{"table": "Sales", "measure": "Revenue"}]},
+                validate_after=False,
+            )
+            server = PBIRMCPServer()
+            result = server.tool_cross_report_index({"search_root": str(root), "measure": "Revenue"})
+            uses = [use for report in result["reports"] for use in report.get("measure_uses", [])]
+            self.assertEqual(result["report_count"], 2)
+            self.assertEqual(len(uses), 1)
+            self.assertEqual(uses[0]["measure"], "Revenue")
+
+    def test_apply_plan_emits_progress_events(self) -> None:
+        with temp_dir() as temp:
+            root = Path(temp)
+            report = PBIRReport.scaffold_project(root, "ProgressTest")
+            server = PBIRMCPServer()
+            events: list[dict] = []
+            server.progress_callback = events.append
+            result = server.tool_apply_plan({
+                "project_path": str(report.report_root),
+                "auto_undo": False,
+                "validate_after": False,
+                "actions": [{"op": "update_page", "page": "Overview", "display_name": "Renamed"}],
+            })
+            self.assertTrue(result["ok"])
+            phases = [event["phase"] for event in events]
+            self.assertEqual(phases, ["started", "action_started", "action_finished", "finished"])
+
+    def test_powerbi_service_request_sends_auth_and_body(self) -> None:
+        import http.server
+        import threading
+
+        seen: dict[str, object] = {}
+
+        class Handler(http.server.BaseHTTPRequestHandler):
+            def log_message(self, fmt: str, *args: object) -> None:
+                return
+
+            def do_POST(self) -> None:
+                length = int(self.headers.get("Content-Length", "0"))
+                seen["path"] = self.path
+                seen["authorization"] = self.headers.get("Authorization")
+                seen["body"] = self.rfile.read(length).decode("utf-8")
+                payload = b'{"accepted":true}'
+                self.send_response(202)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Content-Length", str(len(payload)))
+                self.end_headers()
+                self.wfile.write(payload)
+
+        httpd = http.server.ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+        thread = threading.Thread(target=httpd.serve_forever, daemon=True)
+        thread.start()
+        try:
+            port = httpd.server_address[1]
+            server = PBIRMCPServer()
+            result = server._powerbi_service_request(
+                "POST",
+                "/datasets/ds1/refreshes",
+                {"notifyOption": "NoNotification"},
+                token="token123",
+                base_url=f"http://127.0.0.1:{port}/v1.0/myorg",
+            )
+            self.assertEqual(result["status"], 202)
+            self.assertEqual(result["body"], {"accepted": True})
+            self.assertEqual(seen["path"], "/v1.0/myorg/datasets/ds1/refreshes")
+            self.assertEqual(seen["authorization"], "Bearer token123")
+            self.assertEqual(json.loads(str(seen["body"])), {"notifyOption": "NoNotification"})
+        finally:
+            httpd.shutdown()
+            httpd.server_close()
+
+    def test_git_commit_and_rollback_report_version(self) -> None:
+        import shutil
+
+        if not shutil.which("git"):
+            self.skipTest("git executable not available")
+        with temp_dir() as temp:
+            root = Path(temp)
+            subprocess.run(["git", "init", "-q"], cwd=root, check=True)
+            subprocess.run(["git", "config", "user.email", "pbir-mcp@example.test"], cwd=root, check=True)
+            subprocess.run(["git", "config", "user.name", "PBIR MCP Test"], cwd=root, check=True)
+            report = PBIRReport.scaffold_project(root, "VersionTest")
+            subprocess.run(["git", "add", "."], cwd=root, check=True)
+            subprocess.run(["git", "commit", "-q", "-m", "initial"], cwd=root, check=True)
+
+            report.update_page("Overview", display_name="Changed", validate_after=False)
+            commit = report.git_commit("snapshot")
+            self.assertTrue(commit["commit"])
+
+            report.update_page("Overview", display_name="After", validate_after=False)
+            report.git_rollback("HEAD")
+            page_json = json.loads((report.pages_dir / "Overview" / "page.json").read_text(encoding="utf-8"))
+            self.assertEqual(page_json["displayName"], "Changed")
+
+    def test_sse_transport_streams_apply_plan_progress(self) -> None:
+        import http.client
+        import socket
+        import threading
+        import time
+
+        with temp_dir() as temp:
+            root = Path(temp)
+            report = PBIRReport.scaffold_project(root, "SseProgress")
+            server_path = Path(__file__).resolve().parents[1] / "pbir_mcp_server.py"
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+                sock.bind(("127.0.0.1", 0))
+                port = sock.getsockname()[1]
+
+            proc = subprocess.Popen(
+                [
+                    sys.executable,
+                    "-B",
+                    "-c",
+                    f"import pbir_mcp_server; pbir_mcp_server.run_sse('127.0.0.1', {port})",
+                ],
+                cwd=server_path.parent,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            events: list[dict] = []
+            event_error: list[Exception] = []
+            stop = threading.Event()
+
+            def wait_for_port() -> None:
+                deadline = time.time() + 10
+                while time.time() < deadline:
+                    try:
+                        with socket.create_connection(("127.0.0.1", port), timeout=0.5):
+                            return
+                    except OSError:
+                        time.sleep(0.05)
+                raise AssertionError("SSE server did not start")
+
+            def read_events() -> None:
+                conn: http.client.HTTPConnection | None = None
+                try:
+                    conn = http.client.HTTPConnection("127.0.0.1", port, timeout=10)
+                    conn.request("GET", "/events")
+                    resp = conn.getresponse()
+                    self.assertEqual(resp.status, 200)
+                    while not stop.is_set():
+                        line = resp.readline().decode("utf-8", errors="replace").strip()
+                        if not line:
+                            continue
+                        if line.startswith("data: "):
+                            payload = line.removeprefix("data: ")
+                            if payload != "{}":
+                                events.append(json.loads(payload))
+                            if any(event.get("phase") == "finished" for event in events):
+                                return
+                except Exception as exc:
+                    event_error.append(exc)
+                finally:
+                    if conn is not None:
+                        conn.close()
+
+            try:
+                wait_for_port()
+                reader = threading.Thread(target=read_events, daemon=True)
+                reader.start()
+                time.sleep(0.2)
+                message = {
+                    "jsonrpc": "2.0",
+                    "id": 1,
+                    "method": "tools/call",
+                    "params": {
+                        "name": "pbir_apply_plan",
+                        "arguments": {
+                            "project_path": str(report.report_root),
+                            "auto_undo": False,
+                            "validate_after": False,
+                            "actions": [{"op": "update_page", "page": "Overview", "display_name": "Renamed"}],
+                        },
+                    },
+                }
+                body = json.dumps(message).encode("utf-8")
+                conn = http.client.HTTPConnection("127.0.0.1", port, timeout=10)
+                try:
+                    conn.request("POST", "/message", body=body, headers={"Content-Type": "application/json"})
+                    resp = conn.getresponse()
+                    self.assertEqual(resp.status, 200)
+                    payload = json.loads(resp.read().decode("utf-8"))
+                    self.assertNotIn("isError", payload["result"])
+                    tool_payload = json.loads(payload["result"]["content"][0]["text"])
+                    self.assertTrue(tool_payload["ok"])
+                finally:
+                    conn.close()
+                reader.join(timeout=10)
+                if event_error:
+                    raise event_error[0]
+                phases = [event.get("phase") for event in events]
+                self.assertIn("action_started", phases)
+                self.assertIn("action_finished", phases)
+                self.assertIn("finished", phases)
+            finally:
+                stop.set()
+                proc.terminate()
+                try:
+                    proc.wait(timeout=5)
+                except subprocess.TimeoutExpired:
+                    proc.kill()
+                    proc.wait(timeout=5)
+                if proc.stdout is not None:
+                    proc.stdout.close()
+                if proc.stderr is not None:
+                    proc.stderr.close()
 
     def test_stdio_uses_mcp_json_lines(self) -> None:
         server_path = Path(__file__).resolve().parents[1] / "pbir_mcp_server.py"
