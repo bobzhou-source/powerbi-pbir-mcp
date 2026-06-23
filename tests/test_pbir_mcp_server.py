@@ -321,6 +321,8 @@ class PBIRReportTests(unittest.TestCase):
         self.assertIn("pbir_report_summary", tool_names)
         self.assertIn("read_semantic_model", tool_names)
         self.assertIn("list_projects", tool_names)
+        self.assertIn("find_source_tables", tool_names)
+        self.assertIn("describe_source_tables", tool_names)
 
     def test_scaffold_project_creates_all_files(self) -> None:
         with temp_dir() as temp:
@@ -498,6 +500,59 @@ class PBIRReportTests(unittest.TestCase):
             self.assertEqual(result["tables"][0]["columns"][0]["name"], "Name")
             self.assertEqual(result["tables"][0]["measures"][0]["name"], "Count")
 
+    def test_read_semantic_model_summary_limits_columns(self) -> None:
+        with temp_dir() as temp:
+            root = Path(temp)
+            report_dir = make_fixture(root)
+            sm_dir = root / "Sales.SemanticModel" / "definition" / "tables"
+            sm_dir.mkdir(parents=True)
+            tmdl_content = (
+                "table Products\n"
+                "\tcolumn Name\n\t\tdataType: string\n"
+                "\tcolumn Category\n\t\tdataType: string\n"
+                "\tmeasure Count = COUNTROWS(Products)\n"
+            )
+            (sm_dir / "Products.tmdl").write_text(tmdl_content, encoding="utf-8")
+            report = PBIRReport(report_dir)
+
+            result = report.read_semantic_model(summary=True, max_columns_per_table=1, include_system=False)
+
+            self.assertEqual(result["table_count"], 1)
+            table = result["tables"][0]
+            self.assertEqual(table["name"], "Products")
+            self.assertEqual(table["column_count"], 2)
+            self.assertEqual(table["sample_columns"], [{"name": "Name", "dataType": "string"}])
+            self.assertEqual(table["columns_truncated"], 1)
+            self.assertEqual(table["measures"], ["Count"])
+
+    def test_get_table_source_can_omit_full_sql(self) -> None:
+        with temp_dir() as temp:
+            root = Path(temp)
+            report_dir = make_fixture(root)
+            sm_dir = root / "Sales.SemanticModel" / "definition" / "tables"
+            sm_dir.mkdir(parents=True)
+            (sm_dir / "Products.tmdl").write_text(
+                "table Products\n"
+                "\tcolumn Name\n\t\tdataType: string\n"
+                "\tpartition Products = m\n"
+                "\t\tmode: import\n"
+                "\t\tsource =\n"
+                "\t\t\tlet Source = Sql.Database(\"ME-VMDW01\", \"PAS_DW\", [Query=\"SELECT * FROM dbo.Products\"])\n"
+                "\t\t\tin Source\n",
+                encoding="utf-8",
+            )
+            sm = PBIRSemanticModel.from_report(PBIRReport(report_dir).report_root)
+            self.assertIsNotNone(sm)
+
+            compact = sm.get_table_source("Products", include_sql=False)
+            full = sm.get_table_source("Products", include_sql=True)
+
+            self.assertEqual(compact["server"], "ME-VMDW01")
+            self.assertEqual(compact["source_table"], "dbo.Products")
+            self.assertIn("sql_query_chars", compact)
+            self.assertNotIn("sql_query", compact)
+            self.assertEqual(full["sql_query"], "SELECT * FROM dbo.Products")
+
     def test_list_projects(self) -> None:
         with temp_dir() as temp:
             root = Path(temp)
@@ -512,6 +567,22 @@ class PBIRReportTests(unittest.TestCase):
             self.assertIn("Sales", names)
             self.assertIn("Other", names)
             self.assertEqual(result["project_count"], 2)
+
+    def test_list_projects_skips_staged_export_folder_by_default(self) -> None:
+        with temp_dir() as temp:
+            root = Path(temp)
+            make_fixture(root)
+            (root / "Sales.pbip").write_text(json.dumps({"version": "4.0"}), encoding="utf-8")
+            staged = root / "Sales"
+            staged.mkdir()
+            (staged / "Sales.pbip").write_text(json.dumps({"version": "4.0"}), encoding="utf-8")
+            server = PBIRMCPServer()
+
+            compact = server.tool_list_projects({"search_root": str(root)})
+            all_projects = server.tool_list_projects({"search_root": str(root), "exclude_export_folders": False})
+
+            self.assertEqual([p["path"] for p in compact["projects"]], [str(root / "Sales.pbip")])
+            self.assertEqual(all_projects["project_count"], 2)
 
     def test_current_project_after_load(self) -> None:
         with temp_dir() as temp:

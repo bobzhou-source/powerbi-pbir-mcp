@@ -279,7 +279,7 @@ class PBIRError(RuntimeError):
 
 
 def json_dumps(data: Any) -> str:
-    return json.dumps(data, indent=2, ensure_ascii=False)
+    return json.dumps(data, indent=2, ensure_ascii=False, default=str)
 
 
 def read_json(path: Path) -> Any:
@@ -769,6 +769,12 @@ def error_result(message: str) -> dict[str, Any]:
     return {"content": [{"type": "text", "text": message}], "isError": True}
 
 
+def truncate_text(value: str, max_chars: int) -> str:
+    if max_chars <= 0 or len(value) <= max_chars:
+        return value
+    return value[:max_chars] + f"\n... [truncated {len(value) - max_chars} chars]"
+
+
 def validation_summary(validation: dict[str, Any], include_messages: bool = False) -> dict[str, Any]:
     errors = list(validation.get("errors") or [])
     warnings = list(validation.get("warnings") or [])
@@ -784,6 +790,8 @@ def validation_summary(validation: dict[str, Any], include_messages: bool = Fals
         result["warnings"] = warnings
     elif errors:
         result["first_error"] = errors[0]
+    elif warnings:
+        result["first_warning"] = warnings[0]
     return result
 
 
@@ -1632,7 +1640,14 @@ class PBIRReport:
         return {"source_dir": str(src), "pbix_path": str(out), "file_count": count, "size_kb": round(out.stat().st_size / 1024, 1)}
 
     def journal_dir(self) -> Path:
-        return self.report_root.parent / f".{self.report_root.name}.pbir_mcp_journal"
+        local = self.report_root.parent / f".{self.report_root.name}.pbir_mcp_journal"
+        # Deep Desktop/project paths can make the undo snapshot path exceed
+        # Windows MAX_PATH once nested PBIR folders are copied into the journal.
+        if len(str(local)) <= 140:
+            return local
+        digest = uuid.uuid5(uuid.NAMESPACE_URL, str(self.report_root.resolve())).hex[:12]
+        safe_name = re.sub(r"[^A-Za-z0-9_-]+", "_", self.report_root.name)[:32].strip("_") or "report"
+        return Path(tempfile.gettempdir()) / "pbir_mcp_journal" / f"{safe_name}_{digest}"
 
     def create_undo_snapshot(self, label: str = "manual", include_semantic_model: bool = True) -> dict[str, Any]:
         import time
@@ -1651,6 +1666,7 @@ class PBIRReport:
             "id": snap_id,
             "label": label,
             "created_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
+            "journal_dir": str(root),
             "report_root": str(self.report_root),
             "semantic_model_path": str(sm_path) if sm_path else None,
             "included": included,
@@ -1941,7 +1957,12 @@ class PBIRReport:
             raise PBIRError(result.stderr.strip() or result.stdout.strip())
         return {"rolled_back_to": ref, "paths": paths}
 
-    def read_semantic_model(self) -> dict[str, Any]:
+    def read_semantic_model(
+        self,
+        summary: bool = False,
+        max_columns_per_table: int = 20,
+        include_system: bool = True,
+    ) -> dict[str, Any]:
         """Parse the referenced SemanticModel and return tables, columns, and measures."""
         sm_path = self.semantic_model_path()
         if sm_path is None:
@@ -1957,9 +1978,35 @@ class PBIRReport:
             try:
                 parsed = self._parse_tmdl_table_file(tmdl_file.read_text(encoding="utf-8-sig"))
                 if parsed.get("name"):
+                    if not include_system and parsed.get("name", "").startswith(("LocalDateTable_", "DateTableTemplate_")):
+                        continue
                     tables.append(parsed)
             except Exception as exc:
                 tables.append({"name": tmdl_file.stem, "error": str(exc), "columns": [], "measures": []})
+        if summary:
+            limit = max(0, int(max_columns_per_table))
+            compact_tables: list[dict[str, Any]] = []
+            for table in tables:
+                columns = table.get("columns") or []
+                measures = table.get("measures") or []
+                entry: dict[str, Any] = {
+                    "name": table.get("name"),
+                    "column_count": len(columns),
+                    "measure_count": len(measures),
+                    "sample_columns": [
+                        {"name": col.get("name"), "dataType": col.get("dataType")}
+                        for col in columns[:limit]
+                    ],
+                    "measures": [measure.get("name") for measure in measures],
+                }
+                if len(columns) > limit:
+                    entry["columns_truncated"] = len(columns) - limit
+                if table.get("source_hint"):
+                    entry["source_hint"] = table.get("source_hint")
+                if table.get("error"):
+                    entry["error"] = table.get("error")
+                compact_tables.append(entry)
+            return {"semantic_model_path": str(sm_path), "table_count": len(compact_tables), "tables": compact_tables}
         return {"semantic_model_path": str(sm_path), "table_count": len(tables), "tables": tables}
 
     def search_semantic_model_fields(
@@ -4121,7 +4168,12 @@ class PBIRSemanticModel:
             "total_processed": len(created) + len(overwritten),
         }
 
-    def get_table_source(self, table: str) -> dict[str, Any]:
+    def get_table_source(
+        self,
+        table: str,
+        include_sql: bool = True,
+        max_sql_chars: int = 4000,
+    ) -> dict[str, Any]:
         """Parse a table TMDL and return its data source connection info."""
         import re
         # Table files may be named with or without quotes
@@ -4153,7 +4205,11 @@ class PBIRSemanticModel:
             query_match = re.search(r'\[Query\s*=\s*"([\s\S]*?)"\s*\]', text)
             if query_match:
                 sql = query_match.group(1).replace('""', '"')
-                result["sql_query"] = sql.strip()
+                sql = sql.strip()
+                result["sql_query_chars"] = len(sql)
+                if include_sql:
+                    result["sql_query"] = truncate_text(sql, int(max_sql_chars))
+                    result["sql_query_truncated"] = len(result["sql_query"]) < len(sql)
                 # Extract primary FROM source (first FROM clause) for efficient direct queries
                 from_match = re.search(r'\bFROM\s+([\w\.\[\]]+)', sql, re.IGNORECASE)
                 if from_match:
@@ -4162,7 +4218,11 @@ class PBIRSemanticModel:
         elif partition_type == "dax":
             dax_match = re.search(r'source\s*=\s*([\s\S]+?)(?:\n\t\w|\Z)', text)
             if dax_match:
-                result["dax_expression"] = dax_match.group(1).strip()
+                dax = dax_match.group(1).strip()
+                result["dax_expression_chars"] = len(dax)
+                if include_sql:
+                    result["dax_expression"] = truncate_text(dax, int(max_sql_chars))
+                    result["dax_expression_truncated"] = len(result["dax_expression"]) < len(dax)
 
         # List columns defined in the TMDL
         columns = re.findall(r'^\s+column (\S+)', text, re.MULTILINE)
@@ -5170,8 +5230,9 @@ class PBIRMCPServer:
             "get_table_source",
             (
                 "Parse a SemanticModel table's TMDL to return its data source connection details: "
-                "server, database, the primary source table/view name, the full partition SQL query, "
-                "and the list of columns defined in the model. "
+                "server, database, the primary source table/view name, query length, "
+                "and the list of columns defined in the model. Set include_sql=true only when "
+                "you need the full partition SQL/DAX expression. "
                 "Use this before run_source_query to discover the server/database and build an "
                 "efficient query (e.g. SELECT DISTINCT on the source_table directly rather than "
                 "wrapping the full partition query)."
@@ -5181,17 +5242,24 @@ class PBIRMCPServer:
                 "properties": {
                     "project_path": {"type": "string"},
                     "table": {"type": "string", "description": "Semantic model table name (e.g. 'Suspend Comments')."},
+                    "include_sql": {"type": "boolean", "default": False},
+                    "max_sql_chars": {"type": "integer", "default": 4000},
                 },
                 "required": ["project_path", "table"],
                 "additionalProperties": False,
             },
-            lambda args: self.semantic_model(args).get_table_source(args["table"]),
+            lambda args: self.semantic_model(args).get_table_source(
+                args["table"],
+                include_sql=bool(args.get("include_sql", False)),
+                max_sql_chars=int(args.get("max_sql_chars", 4000)),
+            ),
         )
         self.add_tool(
             "run_source_query",
             (
                 "Run a SQL query directly against a SQL Server data source using Windows Authentication. "
                 "Use preview=true to fetch only 10 rows (fast check before committing to a full query). "
+                "Use mode='summary' to return only columns, row_count, truncated, and one sample row. "
                 "max_rows caps results (default 200, max 5000). "
                 "Single-column results return a compact flat 'values' list instead of rows/columns — "
                 "ideal for SELECT DISTINCT queries used to populate bulk_create_rls_roles. "
@@ -5216,6 +5284,11 @@ class PBIRMCPServer:
                         "default": 200,
                         "description": "Maximum rows to return (capped at 5000).",
                     },
+                    "mode": {
+                        "type": "string",
+                        "enum": ["rows", "summary"],
+                        "default": "rows",
+                    },
                 },
                 "required": ["server", "database", "sql"],
                 "additionalProperties": False,
@@ -5226,6 +5299,55 @@ class PBIRMCPServer:
                 sql=args["sql"],
                 preview=bool(args.get("preview", False)),
                 max_rows=min(int(args.get("max_rows", 200)), 5000),
+                mode=str(args.get("mode", "rows")),
+            ),
+        )
+        self.add_tool(
+            "find_source_tables",
+            (
+                "Compact SQL Server schema discovery. Finds tables/views by keyword without dumping broad "
+                "INFORMATION_SCHEMA results. Use before describe_source_tables."
+            ),
+            {
+                "type": "object",
+                "properties": {
+                    "server": {"type": "string"},
+                    "database": {"type": "string"},
+                    "keywords": {"type": "array", "items": {"type": "string"}, "default": []},
+                    "max_results": {"type": "integer", "default": 50},
+                },
+                "required": ["server", "database"],
+                "additionalProperties": False,
+            },
+            lambda args: self._find_source_tables(
+                server=args["server"],
+                database=args["database"],
+                keywords=args.get("keywords") or [],
+                max_results=min(int(args.get("max_results", 50)), 500),
+            ),
+        )
+        self.add_tool(
+            "describe_source_tables",
+            (
+                "Compact SQL Server column discovery for explicit tables. Pass table names as "
+                "'schema.table' or 'table'. Returns grouped columns and counts."
+            ),
+            {
+                "type": "object",
+                "properties": {
+                    "server": {"type": "string"},
+                    "database": {"type": "string"},
+                    "tables": {"type": "array", "items": {"type": "string"}},
+                    "max_columns_per_table": {"type": "integer", "default": 100},
+                },
+                "required": ["server", "database", "tables"],
+                "additionalProperties": False,
+            },
+            lambda args: self._describe_source_tables(
+                server=args["server"],
+                database=args["database"],
+                tables=args["tables"],
+                max_columns_per_table=int(args.get("max_columns_per_table", 100)),
             ),
         )
         self.add_tool(
@@ -5738,14 +5860,20 @@ class PBIRMCPServer:
         )
         self.add_tool(
             "validate_report",
-            "Run full structural validation. Returns all errors and warnings.",
+            "Run structural validation. Returns compact counts by default; set include_messages=true for all errors/warnings.",
             {
                 "type": "object",
-                "properties": {"project_path": {"type": "string"}},
+                "properties": {
+                    "project_path": {"type": "string"},
+                    "include_messages": {"type": "boolean", "default": False},
+                },
                                 "required": ["project_path"],
 "additionalProperties": False,
             },
-            lambda args: self.report(args).validate().as_dict(),
+            lambda args: validation_summary(
+                self.report(args).validate().as_dict(),
+                include_messages=bool(args.get("include_messages", False)),
+            ),
         )
         self.add_tool(
             "pbir_report_summary",
@@ -5810,25 +5938,43 @@ class PBIRMCPServer:
         )
         self.add_tool(
             "read_semantic_model",
-            "Parse the SemanticModel referenced by the loaded report. Returns tables, columns (with dataType), measures, and source connection hints. Call this before add_visual_from_template to get correct entity/column names.",
+            (
+                "Parse the SemanticModel referenced by the loaded report. "
+                "Use summary=true first for a compact table/field overview; use summary=false only "
+                "when you need every column/measure detail before add_visual_from_template."
+            ),
             {
                 "type": "object",
-                "properties": {"project_path": {"type": "string"}},
+                "properties": {
+                    "project_path": {"type": "string"},
+                    "summary": {"type": "boolean", "default": True},
+                    "max_columns_per_table": {"type": "integer", "default": 20},
+                    "include_system": {"type": "boolean", "default": False},
+                },
                                 "required": ["project_path"],
 "additionalProperties": False,
             },
-            lambda args: self.report(args).read_semantic_model(),
+            lambda args: self.report(args).read_semantic_model(
+                summary=bool(args.get("summary", True)),
+                max_columns_per_table=int(args.get("max_columns_per_table", 20)),
+                include_system=bool(args.get("include_system", False)),
+            ),
         )
         self.add_tool(
             "list_projects",
-            "Scan a directory recursively for Power BI .pbip project files. Returns name, path, and version for each project found.",
+            (
+                "Scan a directory recursively for Power BI .pbip project files. Returns name, path, "
+                "and version for each project found. By default skips staged export folders created "
+                "beside an already-listed .pbip to avoid duplicate clone candidates."
+            ),
             {
                 "type": "object",
                 "properties": {
                     "search_root": {"type": "string"},
                     "max_depth": {"type": "integer", "default": 4},
+                    "exclude_export_folders": {"type": "boolean", "default": True},
                 },
-                "required": ["project_path", "search_root"],
+                "required": ["search_root"],
                 "additionalProperties": False,
             },
             self.tool_list_projects,
@@ -7396,6 +7542,138 @@ class PBIRMCPServer:
             validate_after=bool(args.get("validate_after", False)),
         )
 
+    @staticmethod
+    def _connect_sql_server(server: str, database: str):
+        try:
+            import pyodbc
+        except ImportError:
+            raise PBIRError("pyodbc is not installed. Run: pip install pyodbc")
+        conn_str = f"DRIVER={{SQL Server}};SERVER={server};DATABASE={database};Trusted_Connection=yes;"
+        try:
+            return pyodbc.connect(conn_str, timeout=15)
+        except Exception as exc:
+            raise PBIRError(f"Could not connect to {server}/{database}: {exc}") from exc
+
+    def _find_source_tables(
+        self,
+        server: str,
+        database: str,
+        keywords: list[str],
+        max_results: int = 50,
+    ) -> dict[str, Any]:
+        clean_keywords = [str(k).strip().lower() for k in keywords if str(k).strip()]
+        where = ["TABLE_TYPE IN ('BASE TABLE', 'VIEW')"]
+        params: list[Any] = []
+        if clean_keywords:
+            keyword_clauses = []
+            for keyword in clean_keywords:
+                keyword_clauses.append("(LOWER(TABLE_SCHEMA) LIKE ? OR LOWER(TABLE_NAME) LIKE ?)")
+                like = f"%{keyword}%"
+                params.extend([like, like])
+            where.append("(" + " OR ".join(keyword_clauses) + ")")
+        sql = (
+            "SELECT TABLE_SCHEMA, TABLE_NAME, TABLE_TYPE "
+            "FROM INFORMATION_SCHEMA.TABLES "
+            f"WHERE {' AND '.join(where)} "
+            "ORDER BY TABLE_SCHEMA, TABLE_NAME"
+        )
+        limit = max(1, int(max_results))
+        conn = self._connect_sql_server(server, database)
+        try:
+            cursor = conn.cursor()
+            cursor.execute(sql, *params)
+            rows = cursor.fetchmany(limit + 1)
+        except Exception as exc:
+            raise PBIRError(f"Schema query failed: {exc}") from exc
+        finally:
+            conn.close()
+        returned = rows[:limit]
+        return {
+            "server": server,
+            "database": database,
+            "keywords": clean_keywords,
+            "table_count": len(returned),
+            "truncated": len(rows) > limit,
+            "tables": [
+                {
+                    "schema": row[0],
+                    "name": row[1],
+                    "full_name": f"{row[0]}.{row[1]}",
+                    "type": row[2],
+                }
+                for row in returned
+            ],
+        }
+
+    def _describe_source_tables(
+        self,
+        server: str,
+        database: str,
+        tables: list[str],
+        max_columns_per_table: int = 100,
+    ) -> dict[str, Any]:
+        requested = [str(t).strip() for t in tables if str(t).strip()]
+        if not requested:
+            raise PBIRError("describe_source_tables requires at least one table.")
+        clauses: list[str] = []
+        params: list[Any] = []
+        for table in requested:
+            parts = [p.strip("[] ") for p in table.split(".") if p.strip("[] ")]
+            if len(parts) >= 2:
+                schema_name, table_name = parts[-2], parts[-1]
+                clauses.append("(TABLE_SCHEMA = ? AND TABLE_NAME = ?)")
+                params.extend([schema_name, table_name])
+            else:
+                clauses.append("(TABLE_NAME = ?)")
+                params.append(parts[0])
+        sql = (
+            "SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_TYPE, ORDINAL_POSITION "
+            "FROM INFORMATION_SCHEMA.COLUMNS "
+            f"WHERE {' OR '.join(clauses)} "
+            "ORDER BY TABLE_SCHEMA, TABLE_NAME, ORDINAL_POSITION"
+        )
+        conn = self._connect_sql_server(server, database)
+        try:
+            cursor = conn.cursor()
+            cursor.execute(sql, *params)
+            rows = cursor.fetchall()
+        except Exception as exc:
+            raise PBIRError(f"Column query failed: {exc}") from exc
+        finally:
+            conn.close()
+
+        limit = max(0, int(max_columns_per_table))
+        grouped: dict[str, dict[str, Any]] = {}
+        for row in rows:
+            key = f"{row[0]}.{row[1]}"
+            entry = grouped.setdefault(
+                key,
+                {"schema": row[0], "name": row[1], "full_name": key, "column_count": 0, "columns": []},
+            )
+            entry["column_count"] += 1
+            if len(entry["columns"]) < limit:
+                entry["columns"].append({
+                    "name": row[2],
+                    "dataType": row[3],
+                    "ordinal": row[4],
+                })
+        for entry in grouped.values():
+            if entry["column_count"] > len(entry["columns"]):
+                entry["columns_truncated"] = entry["column_count"] - len(entry["columns"])
+        found = set(grouped)
+        missing = [
+            table for table in requested
+            if table not in found and not any(key.endswith(f".{table}") for key in found)
+        ]
+        return {
+            "server": server,
+            "database": database,
+            "requested": requested,
+            "table_count": len(grouped),
+            "tables": list(grouped.values()),
+            "missing": missing,
+        }
+
     def _run_source_query(
         self,
         server: str,
@@ -7403,18 +7681,12 @@ class PBIRMCPServer:
         sql: str,
         preview: bool = False,
         max_rows: int = 200,
+        mode: str = "rows",
     ) -> dict[str, Any]:
-        try:
-            import pyodbc
-        except ImportError:
-            raise PBIRError("pyodbc is not installed. Run: pip install pyodbc")
-
+        if mode not in {"rows", "summary"}:
+            raise PBIRError("mode must be one of: rows, summary")
         limit = 10 if preview else max_rows
-        conn_str = f"DRIVER={{SQL Server}};SERVER={server};DATABASE={database};Trusted_Connection=yes;"
-        try:
-            conn = pyodbc.connect(conn_str, timeout=15)
-        except Exception as e:
-            raise PBIRError(f"Could not connect to {server}/{database}: {e}")
+        conn = self._connect_sql_server(server, database)
 
         try:
             cursor = conn.cursor()
@@ -7427,6 +7699,13 @@ class PBIRMCPServer:
             conn.close()
 
         truncated = len(rows) == limit
+        if mode == "summary":
+            return {
+                "columns": columns,
+                "row_count": len(rows),
+                "truncated": truncated,
+                "sample_row": list(rows[0]) if rows else None,
+            }
         if len(columns) == 1:
             # Compact flat list for single-column queries (e.g. SELECT DISTINCT col)
             return {
@@ -7563,7 +7842,7 @@ class PBIRMCPServer:
         return {
             "report_root": str(self.current_report.report_root),
             "definition_dir": str(self.current_report.definition_dir),
-            "validation": validation_summary(validation, include_messages=True),
+            "validation": validation_summary(validation),
         }
 
     def tool_list_projects(self, args: dict[str, Any]) -> dict[str, Any]:
@@ -7571,12 +7850,14 @@ class PBIRMCPServer:
         if not root.exists():
             raise PBIRError(f"Directory does not exist: {root}")
         max_depth = int(args.get("max_depth", 4))
+        exclude_export_folders = bool(args.get("exclude_export_folders", True))
         projects: list[dict[str, Any]] = []
 
         def scan(path: Path, depth: int) -> None:
             if depth > max_depth:
                 return
             try:
+                sibling_pbip_stems = {p.stem for p in path.glob("*.pbip")}
                 for child in sorted(path.iterdir(), key=lambda p: p.name.lower()):
                     if child.is_file() and child.suffix.lower() == ".pbip":
                         try:
@@ -7585,12 +7866,19 @@ class PBIRMCPServer:
                             version = "?"
                         projects.append({"name": child.stem, "path": str(child), "version": version})
                     elif child.is_dir() and not child.name.startswith("."):
+                        if exclude_export_folders and child.name in sibling_pbip_stems:
+                            continue
                         scan(child, depth + 1)
             except PermissionError:
                 pass
 
         scan(root, 0)
-        return {"search_root": str(root), "project_count": len(projects), "projects": projects}
+        return {
+            "search_root": str(root),
+            "project_count": len(projects),
+            "exclude_export_folders": exclude_export_folders,
+            "projects": projects,
+        }
 
     def tool_create_page(self, args: dict[str, Any]) -> dict[str, Any]:
         return self.report(args).create_page(
