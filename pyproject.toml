@@ -1,4 +1,4 @@
-[build-system]
+﻿[build-system]
 requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
@@ -36,3 +36,4 @@ powerbi-pbir-mcp-sse = "pbir_mcp_server:run_sse"
 
 [tool.setuptools]
 py-modules = ["pbir_mcp_server"]
+packages = ["pbir_mcp"]
