@@ -1,0 +1,46 @@
+{
+  "title": "powerbi-pbir-mcp: Agentic Power BI PBIR, PBIP & DAX Model Context Protocol (MCP) Server for Report Editing, Semantic Models and Row-Level Security — Robert Zhou",
+  "description": "<p>Local, standard-library-only Python MCP server that lets AI agents load, scaffold, edit and validate Power BI Project (PBIP) reports saved in the PBIR format: pages, visuals, themes and layout via batched apply plans, plus semantic model tables, DAX measures, relationships, hierarchies, perspectives and row-level security (RLS) roles.</p><p>Built by Robert Zhou during his enterprise AI work at Parsifal Corporation, where it was one of four internal MCP servers (SQL, Power BI, M365, AI governance) alongside a .NET 8 billing engine. Works with Codex, Claude Code and other MCP clients over stdio.</p><p>Author: Robert Zhou, Colby College. Portfolio: <a href=\"https://robertzhou.dev\">robertzhou.dev</a>. Project write-up: <a href=\"https://robertzhou.dev/work/parsifal-billing/\">https://robertzhou.dev/work/parsifal-billing/</a>. Source: <a href=\"https://github.com/bobzhou-source/powerbi-pbir-mcp\">github.com/bobzhou-source/powerbi-pbir-mcp</a>.</p>",
+  "upload_type": "software",
+  "creators": [
+    {
+      "name": "Zhou, Robert",
+      "affiliation": "Colby College",
+      "orcid": "0009-0009-2155-7215"
+    }
+  ],
+  "keywords": [
+    "Power BI",
+    "PBIR",
+    "PBIP",
+    "DAX",
+    "TMDL",
+    "semantic model",
+    "row-level security",
+    "Model Context Protocol",
+    "MCP server",
+    "AI agents",
+    "business intelligence",
+    "report automation",
+    "Python",
+    "Robert Zhou"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "https://robertzhou.dev",
+      "relation": "isSupplementedBy",
+      "scheme": "url"
+    },
+    {
+      "identifier": "https://robertzhou.dev/work/parsifal-billing/",
+      "relation": "isDocumentedBy",
+      "scheme": "url"
+    },
+    {
+      "identifier": "https://github.com/bobzhou-source/powerbi-pbir-mcp",
+      "relation": "isSupplementTo",
+      "scheme": "url"
+    }
+  ],
+  "license": "GPL-2.0-only"
+}
