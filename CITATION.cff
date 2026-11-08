@@ -1,0 +1,29 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using the metadata from this file."
+type: software
+title: "powerbi-pbir-mcp: Agentic Power BI PBIR, PBIP & DAX Model Context Protocol (MCP) Server for Report Editing, Semantic Models and Row-Level Security"
+abstract: "Local, standard-library-only Python MCP server that lets AI agents load, scaffold, edit and validate Power BI Project (PBIP) reports saved in the PBIR format: pages, visuals, themes and layout via batched apply plans, plus semantic model tables, DAX measures, relationships, hierarchies, perspectives and row-level security (RLS) roles."
+authors:
+  - family-names: Zhou
+    given-names: Robert
+    orcid: https://orcid.org/0009-0009-2155-7215
+    affiliation: Colby College
+    website: https://robertzhou.dev
+url: https://robertzhou.dev
+repository-code: https://github.com/bobzhou-source/powerbi-pbir-mcp
+license: GPL-2.0-only
+keywords:
+  - "Power BI"
+  - "PBIR"
+  - "PBIP"
+  - "DAX"
+  - "TMDL"
+  - "semantic model"
+  - "row-level security"
+  - "Model Context Protocol"
+  - "MCP server"
+  - "AI agents"
+  - "business intelligence"
+  - "report automation"
+  - "Python"
+  - "Robert Zhou"
